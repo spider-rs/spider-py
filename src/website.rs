@@ -315,140 +315,119 @@ impl Website {
     }
   }
 
-  // /// scrape a website
-  // pub async unsafe fn scrape(
-  //   &mut self,
-  //   // on_page_event: Option<napi::threadsafe_function::ThreadsafeFunction<NPage>>,
-  //   background: Option<bool>,
-  //   headless: Option<bool>,
-  // ) {
-  //   let headless = headless.is_some() && headless.unwrap_or_default();
-  //   let raw_content = self.raw_content;
-  //   let background = background.is_some() && background.unwrap_or_default();
+  /// scrape a website
+  pub fn scrape(
+    mut slf: PyRefMut<'_, Self>,
+    on_page_event: Option<PyObject>,
+    background: Option<bool>,
+    headless: Option<bool>,
+  ) {
+    let headless = headless.is_some() && headless.unwrap_or_default();
+    let raw_content = slf.raw_content;
+    let background = background.is_some() && background.unwrap_or_default();
 
-  //   if background {
-  //     self.running_in_background = background;
-  //   }
+    if background {
+      slf.running_in_background = background;
+    }
 
-  //   if background {
-  //     let mut website = self.inner.clone();
+    match on_page_event {
+      Some(callback) => {
+        if background {
+          let mut website = slf.inner.clone();
+          let mut rx2 = website
+            .subscribe(*BUFFER / 2)
+            .expect("sync feature should be enabled");
 
-  //     let crawl_id = match self.crawl_handles.last() {
-  //       Some(handle) => handle.0 + 1,
-  //       _ => 0,
-  //     };
+          let handle = spider::tokio::spawn(async move {
+            while let Ok(res) = rx2.recv().await {
+              Python::with_gil(|py| {
+                let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+              });
+            }
+          });
 
-  //     let crawl_handle = spider::tokio::spawn(async move {
-  //       if headless {
-  //         website.scrape().await;
-  //       } else {
-  //         website.scrape_raw().await;
-  //       }
-  //     });
+          let crawl_id = match slf.crawl_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
 
-  //     self.crawl_handles.insert(crawl_id, crawl_handle);
-  //   } else {
-  //     if headless {
-  //       self.inner.scrape().await;
-  //     } else {
-  //       self.inner.scrape_raw().await;
-  //     }
-  //   }
+          let crawl_handle = spider::tokio::spawn(async move {
+            if headless {
+              website.scrape().await;
+            } else {
+              website.scrape_raw().await;
+            }
+          });
 
-  //   // match on_page_event {
-  //   //   Some(callback) => {
-  //   //     if background {
-  //   //       let mut website = self.inner.clone();
-  //   //       let mut rx2 = website
-  //   //         .subscribe(*BUFFER / 2)
-  //   //         .expect("sync feature should be enabled");
+          let id = match slf.subscription_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
 
-  //   //       let handle = spider::tokio::spawn(async move {
-  //   //         while let Ok(res) = rx2.recv().await {
-  //   //           callback.call(
-  //   //             Ok(NPage::new(&res, raw_content)),
-  //   //             napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
-  //   //           );
-  //   //         }
-  //   //       });
+          slf.crawl_handles.insert(crawl_id, crawl_handle);
+          slf.subscription_handles.insert(id, handle);
+        } else {
+          let mut rx2 = slf
+            .inner
+            .subscribe(*BUFFER / 2)
+            .expect("sync feature should be enabled");
 
-  //   //       let crawl_id = match self.crawl_handles.last() {
-  //   //         Some(handle) => handle.0 + 1,
-  //   //         _ => 0,
-  //   //       };
+          let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
+            while let Ok(res) = rx2.recv().await {
+              Python::with_gil(|py| {
+                let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+              });
+            }
+          });
 
-  //   //       let crawl_handle = spider::tokio::spawn(async move {
-  //   //         if headless {
-  //   //           website.scrape().await;
-  //   //         } else {
-  //   //           website.scrape_raw().await;
-  //   //         }
-  //   //       });
+          let id = match slf.subscription_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
 
-  //   //       let id = match self.subscription_handles.last() {
-  //   //         Some(handle) => handle.0 + 1,
-  //   //         _ => 0,
-  //   //       };
+          slf.subscription_handles.insert(id, handle);
 
-  //   //       self.crawl_handles.insert(crawl_id, crawl_handle);
-  //   //       self.subscription_handles.insert(id, handle);
-  //   //     } else {
-  //   //       let mut rx2 = self
-  //   //         .inner
-  //   //         .subscribe(*BUFFER / 2)
-  //   //         .expect("sync feature should be enabled");
+          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+            if headless {
+              slf.inner.scrape().await;
+            } else {
+              slf.inner.scrape_raw().await;
+            }
+            Ok::<(), ()>(())
+          });
+        }
+      }
+      _ => {
+        if background {
+          let mut website = slf.inner.clone();
 
-  //   //       let handle = spider::tokio::spawn(async move {
-  //   //         while let Ok(res) = rx2.recv().await {
-  //   //           callback.call(
-  //   //             Ok(NPage::new(&res, raw_content)),
-  //   //             napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
-  //   //           );
-  //   //         }
-  //   //       });
+          let crawl_id = match slf.crawl_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
 
-  //   //       if headless {
-  //   //         self.inner.scrape().await;
-  //   //       } else {
-  //   //         self.inner.scrape_raw().await;
-  //   //       }
+          let crawl_handle = spider::tokio::spawn(async move {
+            if headless {
+              website.scrape().await;
+            } else {
+              website.scrape_raw().await;
+            }
+          });
 
-  //   //       let id = match self.subscription_handles.last() {
-  //   //         Some(handle) => handle.0 + 1,
-  //   //         _ => 0,
-  //   //       };
-
-  //   //       self.subscription_handles.insert(id, handle);
-  //   //     }
-  //   //   }
-  //   //   _ => {
-  //   //     if background {
-  //   //       let mut website = self.inner.clone();
-
-  //   //       let crawl_id = match self.crawl_handles.last() {
-  //   //         Some(handle) => handle.0 + 1,
-  //   //         _ => 0,
-  //   //       };
-
-  //   //       let crawl_handle = spider::tokio::spawn(async move {
-  //   //         if headless {
-  //   //           website.scrape().await;
-  //   //         } else {
-  //   //           website.scrape_raw().await;
-  //   //         }
-  //   //       });
-
-  //   //       self.crawl_handles.insert(crawl_id, crawl_handle);
-  //   //     } else {
-  //   //       if headless {
-  //   //         self.inner.scrape().await;
-  //   //       } else {
-  //   //         self.inner.scrape_raw().await;
-  //   //       }
-  //   //     }
-  //   //   }
-  //   // }
-  // }
+          slf.crawl_handles.insert(crawl_id, crawl_handle);
+        } else {
+          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+            if headless {
+              slf.inner.scrape().await;
+            } else {
+              slf.inner.scrape_raw().await;
+            }
+            Ok::<(), ()>(())
+          });
+        }
+      }
+    }
+  }
 
   //  /// run a cron job
   // pub async unsafe fn run_cron(
