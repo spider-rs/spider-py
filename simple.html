@@ -185,8 +185,8 @@
 from spider_py import crawl
 
 async def main():
-    links = await crawl(&quot;https://jeffmendez.com&quot;)
-    print(links)
+    website = await crawl(&quot;https://jeffmendez.com&quot;)
+    print(website.links)
 
 asyncio.run(main())
 </code></pre>
