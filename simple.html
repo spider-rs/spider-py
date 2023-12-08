@@ -187,6 +187,7 @@ from spider_rs import crawl
 async def main():
     website = await crawl(&quot;https://jeffmendez.com&quot;)
     print(website.links)
+    # print(website.pages)
 
 asyncio.run(main())
 </code></pre>
