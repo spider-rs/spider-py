@@ -185,9 +185,9 @@
 from spider_py import crawl
 
 async def main():
-    await crawl()
+    links = await crawl(&quot;https://jeffmendez.com&quot;)
+    print(links)
 
-# should crawl a website concurrent natively returning all links and resources found.
 asyncio.run(main())
 </code></pre>
 
