@@ -19,6 +19,8 @@ fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<&PyAny>
 #[pymodule]
 fn spider_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(crawl, m)?)?;
+  m.add_class::<Website>()?;
+
   Ok(())
 }
 
@@ -47,7 +49,8 @@ struct PageEvent {
 #[pymethods]
 impl Website {
   /// a new website.
-  pub fn __new__(&self, url: String, raw_content: Option<bool>) -> Self {
+  #[new]
+  pub fn new(url: String, raw_content: Option<bool>) -> Self {
     Website {
       inner: spider::website::Website::new(&url),
       subscription_handles: IndexMap::new(),
@@ -312,7 +315,7 @@ impl Website {
           });
         }
       }
-    }
+    };
   }
 
   /// scrape a website
@@ -429,37 +432,38 @@ impl Website {
     }
   }
 
-  //  /// run a cron job
-  // pub async unsafe fn run_cron(
-  //   &mut self,
-  //   on_page_event: Option<napi::threadsafe_function::ThreadsafeFunction<NPage>>,
-  // ) -> Cron {
-  //   let cron_handle = match on_page_event {
-  //     Some(callback) => {
-  //       let mut rx2 = self
-  //         .inner
-  //         .subscribe(*BUFFER / 2)
-  //         .expect("sync feature should be enabled");
-  //       let raw_content = self.raw_content;
+  /// run a cron job
+  pub fn run_cron(mut slf: PyRefMut<'_, Self>, on_page_event: Option<PyObject>) -> Cron {
+    let cron_handle = match on_page_event {
+      Some(callback) => {
+        let mut rx2 = slf
+          .inner
+          .subscribe(*BUFFER / 2)
+          .expect("sync feature should be enabled");
+        let raw_content = slf.raw_content;
 
-  //       let handler = spider::tokio::spawn(async move {
-  //         while let Ok(res) = rx2.recv().await {
-  //           callback.call(
-  //             Ok(NPage::new(&res, raw_content)),
-  //             napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
-  //           );
-  //         }
-  //       });
+        let handler = spider::tokio::spawn(async move {
+          while let Ok(res) = rx2.recv().await {
+            Python::with_gil(|py| {
+              let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+            });
+          }
+        });
 
-  //       Some(handler)
-  //     }
-  //     _ => None,
-  //   };
+        Some(handler)
+      }
+      _ => None,
+    };
 
-  //   let inner = self.inner.run_cron().await;
+    let inner = pyo3_asyncio::tokio::get_runtime()
+      .block_on(async move {
+        let runner: spider::async_job::Runner = slf.inner.run_cron().await;
+        Ok::<spider::async_job::Runner, ()>(runner)
+      })
+      .unwrap();
 
-  //   Cron { inner, cron_handle }
-  // }
+    Cron { inner, cron_handle }
+  }
 
   /// get all the links of a website
   pub fn get_links(&self) -> Vec<String> {
@@ -717,6 +721,7 @@ impl Website {
 }
 
 /// a runner for handling crons
+#[pyclass]
 pub struct Cron {
   /// the runner task
   inner: spider::async_job::Runner,
@@ -724,14 +729,17 @@ pub struct Cron {
   cron_handle: Option<JoinHandle<()>>,
 }
 
+#[pymethods]
 impl Cron {
   /// stop the cron instance
-
-  pub async unsafe fn stop(&mut self) {
-    self.inner.stop().await;
-    match &self.cron_handle {
+  pub fn stop(mut slf: PyRefMut<'_, Self>) {
+    match &slf.cron_handle {
       Some(h) => h.abort(),
       _ => (),
-    }
+    };
+    let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+      slf.inner.stop().await;
+      Ok::<(), ()>(())
+    });
   }
 }

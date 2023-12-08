@@ -1,6 +1,6 @@
 # spider-py
 
-The [spider](https://github.com/spider-rs/spider) project ported to Python (Incomplete Port WIP).
+The [spider](https://github.com/spider-rs/spider) project ported to Python.
 
 ## Getting Started
 
@@ -18,6 +18,22 @@ async def main():
 
 asyncio.run(main())
 ```
+
+Use the Website class to build the crawler you need.
+
+```python
+import asyncio
+
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com", False)
+    website.crawl()
+    print(website.get_links())
+
+asyncio.run(main())
+```
+
 ## Development
 
 Install maturin `pipx install maturin` and python.
@@ -26,8 +42,7 @@ Install maturin `pipx install maturin` and python.
 
 ## Todo
 
-1. Add thread safe callback handling crawl/scrape.
-1. Add callback Cron.
-1. Add subscription callback.
+1. Port Page function.
+1. Add better docs.
 
 Once these items are done the base of the module should be complete. Most of the code comes from the initial port to Node.js that was done.
