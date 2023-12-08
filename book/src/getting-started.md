@@ -1,7 +1,7 @@
 # Getting Started
 
-Make sure to have python installed v10 and higher.
+Make sure to have python installed.
 
 ```sh
-pip install spider-py
+pip install spider_rs
 ```

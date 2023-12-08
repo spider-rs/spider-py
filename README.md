@@ -1,6 +1,6 @@
 # spider-py
 
-The [spider](https://github.com/spider-rs/spider) project ported to Python.
+The [spider](https://github.com/spider-rs/spider) project ported to Python (Incomplete Port WIP).
 
 ## Getting Started
 
@@ -14,6 +14,7 @@ from spider_rs import crawl
 async def main():
     website = await crawl("https://choosealicense.com")
     print(website.links)
+    # print(website.pages)
 
 asyncio.run(main())
 ```
