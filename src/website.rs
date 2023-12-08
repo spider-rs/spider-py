@@ -1,4 +1,5 @@
 use crate::NPage;
+use crate::BUFFER;
 use compact_str::CompactString;
 use indexmap::IndexMap;
 use pyo3::prelude::*;
@@ -46,7 +47,7 @@ struct PageEvent {
 #[pymethods]
 impl Website {
   /// a new website.
-  pub fn new(&self, url: String, raw_content: Option<bool>) -> Self {
+  pub fn __new__(&self, url: String, raw_content: Option<bool>) -> Self {
     Website {
       inner: spider::website::Website::new(&url),
       subscription_handles: IndexMap::new(),
@@ -105,36 +106,33 @@ impl Website {
   //   Ok(())
   // }
 
-  // /// subscribe and add an event listener.
-  // pub fn subscribe(
-  //   &mut self,
-  //   on_page_event: napi::threadsafe_function::ThreadsafeFunction<NPage>,
-  // ) -> u32 {
-  //   let mut rx2 = self
-  //     .inner
-  //     .subscribe(*BUFFER / 2)
-  //     .expect("sync feature should be enabled");
-  //   let raw_content = self.raw_content;
+  /// subscribe and add an event listener.
+  pub fn subscribe(mut slf: PyRefMut<'_, Self>, on_page_event: PyObject) -> u32 {
+    let mut rx2 = slf
+      .inner
+      .subscribe(*BUFFER / 2)
+      .expect("sync feature should be enabled");
+    let raw_content = slf.raw_content;
 
-  //   let handle = spider::tokio::spawn(async move {
-  //     while let Ok(res) = rx2.recv().await {
-  //       on_page_event.call(
-  //         Ok(NPage::new(&res, raw_content)),
-  //         napi::threadsafe_function::ThreadsafeFunctionCallMode::NonBlocking,
-  //       );
-  //     }
-  //   });
+    let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
+      while let Ok(res) = rx2.recv().await {
+        let page = NPage::new(&res, raw_content);
+        Python::with_gil(|py| {
+          let _ = on_page_event.call(py, (page, 0), None);
+        });
+      }
+    });
 
-  //   // always return the highest value as the next id.
-  //   let id = match self.subscription_handles.last() {
-  //     Some(handle) => handle.0 + 1,
-  //     _ => 0,
-  //   };
+    // always return the highest value as the next id.
+    let id = match slf.subscription_handles.last() {
+      Some(handle) => handle.0 + 1,
+      _ => 0,
+    };
 
-  //   self.subscription_handles.insert(id, handle);
+    slf.subscription_handles.insert(id, handle);
 
-  //   id
-  // }
+    id
+  }
 
   // /// remove a subscription listener.
   // pub fn unsubscribe(&mut self, id: Option<u32>) -> bool {
@@ -588,13 +586,22 @@ impl Website {
   // }
 
   /// Add user agent to request.
-  pub fn with_user_agent(mut slf: PyRefMut<'_, Self>, user_agent: Option<String>) -> PyRefMut<'_, Self> {
-    slf.inner.configuration.with_user_agent(user_agent.as_deref());
+  pub fn with_user_agent(
+    mut slf: PyRefMut<'_, Self>,
+    user_agent: Option<String>,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_user_agent(user_agent.as_deref());
     slf
   }
 
   /// Respect robots.txt file.
-  pub fn with_respect_robots_txt(mut slf: PyRefMut<'_, Self>, respect_robots_txt: bool) -> PyRefMut<'_, Self>  {
+  pub fn with_respect_robots_txt(
+    mut slf: PyRefMut<'_, Self>,
+    respect_robots_txt: bool,
+  ) -> PyRefMut<'_, Self> {
     slf
       .inner
       .configuration
@@ -615,7 +622,10 @@ impl Website {
   }
 
   /// Only use HTTP/2.
-  pub fn with_http2_prior_knowledge(mut slf: PyRefMut<'_, Self>, http2_prior_knowledge: bool) -> PyRefMut<'_, Self> {
+  pub fn with_http2_prior_knowledge(
+    mut slf: PyRefMut<'_, Self>,
+    http2_prior_knowledge: bool,
+  ) -> PyRefMut<'_, Self> {
     slf
       .inner
       .configuration
@@ -624,7 +634,10 @@ impl Website {
   }
 
   /// Max time to wait for request duration to milliseconds.
-  pub fn with_request_timeout(mut slf: PyRefMut<'_, Self>, request_timeout: Option<u32>) -> PyRefMut<'_, Self> {
+  pub fn with_request_timeout(
+    mut slf: PyRefMut<'_, Self>,
+    request_timeout: Option<u32>,
+  ) -> PyRefMut<'_, Self> {
     slf
       .inner
       .configuration
