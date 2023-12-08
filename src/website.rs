@@ -1,24 +1,24 @@
-use pyo3::prelude::*;
 use crate::NPage;
 use compact_str::CompactString;
 use indexmap::IndexMap;
-use spider::utils::shutdown;
+use pyo3::prelude::*;
 use spider::tokio::task::JoinHandle;
+use spider::utils::shutdown;
 use std::time::Duration;
 
 #[pyfunction]
-fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<&PyAny> {    
-    pyo3_asyncio::tokio::future_into_py(py, async move {
-      let w = crate::crawl(url, raw_content).await;
+fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<&PyAny> {
+  pyo3_asyncio::tokio::future_into_py(py, async move {
+    let w = crate::crawl(url, raw_content).await;
 
-      Ok(w)
+    Ok(w)
   })
 }
 
 #[pymodule]
 fn spider_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-    m.add_function(wrap_pyfunction!(crawl, m)?)?;
-    Ok(())
+  m.add_function(wrap_pyfunction!(crawl, m)?)?;
+  Ok(())
 }
 
 /// a website holding the inner spider::website::Website from Rust fit for python.
@@ -35,9 +35,8 @@ pub struct Website {
   /// the data collected.
   collected_data: Box<Vec<u8>>,
   /// is the crawl running in the background.
-  running_in_background: bool
-   // /// the file handle for storing data
-                                // file_handle: Option<spider::tokio::fs::File>,
+  running_in_background: bool, // /// the file handle for storing data
+                               // file_handle: Option<spider::tokio::fs::File>,
 }
 
 struct PageEvent {
@@ -54,8 +53,7 @@ impl Website {
       crawl_handles: IndexMap::new(),
       raw_content: raw_content.unwrap_or_default(),
       collected_data: Box::new(Vec::new()),
-      running_in_background: false
-      // file_handle: None,
+      running_in_background: false, // file_handle: None,
     }
   }
 
@@ -63,7 +61,7 @@ impl Website {
   pub fn status(&self) -> String {
     self.inner.get_status().to_string()
   }
-  
+
   // /// store data to memory for disk storing. This will create the path if not exist and defaults to ./storage.
   // pub async fn export_jsonl_data(&self, export_path: Option<String>) -> std::io::Result<()> {
   //   use spider::tokio::io::AsyncWriteExt;
@@ -107,7 +105,6 @@ impl Website {
   //   Ok(())
   // }
 
-  
   // /// subscribe and add an event listener.
   // pub fn subscribe(
   //   &mut self,
@@ -139,7 +136,6 @@ impl Website {
   //   id
   // }
 
-  
   // /// remove a subscription listener.
   // pub fn unsubscribe(&mut self, id: Option<u32>) -> bool {
   //   match id {
@@ -166,7 +162,6 @@ impl Website {
   //   }
   // }
 
-  
   // /// stop a crawl
   // pub async unsafe fn stop(&mut self, id: Option<u32>) -> bool {
   //   self.inner.stop();
@@ -201,7 +196,6 @@ impl Website {
   //   }
   // }
 
-  
   // /// crawl a website
   // pub async unsafe fn crawl(
   //   &mut self,
@@ -213,7 +207,7 @@ impl Website {
   //   let background = background.is_some() && background.unwrap_or_default();
   //   let headless = headless.is_some() && headless.unwrap_or_default();
   //   // let raw_content = self.raw_content;
-    
+
   //   if background {
   //     self.running_in_background = background;
   //   }
@@ -338,7 +332,6 @@ impl Website {
   //   // }
   // }
 
-  
   // /// scrape a website
   // pub async unsafe fn scrape(
   //   &mut self,
@@ -506,62 +499,57 @@ impl Website {
   //   Cron { inner, cron_handle }
   // }
 
-  
-  // /// get all the links of a website
-  // pub fn get_links(&self) -> Vec<String> {
-  //   let links = self
-  //     .inner
-  //     .get_links()
-  //     .iter()
-  //     .map(|x| x.as_ref().to_string())
-  //     .collect::<Vec<String>>();
-  //   links
-  // }
+  /// get all the links of a website
+  pub fn get_links(&self) -> Vec<String> {
+    let links = self
+      .inner
+      .get_links()
+      .iter()
+      .map(|x| x.as_ref().to_string())
+      .collect::<Vec<String>>();
+    links
+  }
 
-  // /// get the size of the website in amount of pages crawled. If you ran the page in the background, this value will not update.
-  // pub fn size(&mut self) -> u32 {
-  //   self.inner.size() as u32
-  // }
+  /// get the size of the website in amount of pages crawled. If you ran the page in the background, this value will not update.
+  pub fn size(&mut self) -> u32 {
+    self.inner.size() as u32
+  }
 
-  // /// get all the pages of a website - requires calling website.scrape
-  
-  // pub fn get_pages(&self) -> Vec<NPage> {
-  //   let mut pages: Vec<NPage> = Vec::new();
-  //   let raw_content = self.raw_content;
+  /// get all the pages of a website - requires calling website.scrape
+  pub fn get_pages(&self) -> Vec<NPage> {
+    let mut pages: Vec<NPage> = Vec::new();
+    let raw_content = self.raw_content;
 
-  //   match self.inner.get_pages() {
-  //     Some(p) => {
-  //       for page in p.iter() {
-  //         pages.push(NPage::new(page, raw_content));
-  //       }
-  //     }
-  //     _ => (),
-  //   }
+    match self.inner.get_pages() {
+      Some(p) => {
+        for page in p.iter() {
+          pages.push(NPage::new(page, raw_content));
+        }
+      }
+      _ => (),
+    }
 
-  //   pages
-  // }
+    pages
+  }
 
-  
-  // /// drain all links from storing
-  // pub fn drain_links(&mut self) -> Vec<String> {
-  //   let links = self
-  //     .inner
-  //     .drain_links()
-  //     .map(|x| x.as_ref().to_string())
-  //     .collect::<Vec<String>>();
+  /// drain all links from storing
+  pub fn drain_links(&mut self) -> Vec<String> {
+    let links = self
+      .inner
+      .drain_links()
+      .map(|x| x.as_ref().to_string())
+      .collect::<Vec<String>>();
 
-  //   links
-  // }
+    links
+  }
 
-  
-  // /// clear all links and page data
-  // pub fn clear(&mut self) {
-  //   self.inner.clear();
-  // }
+  /// clear all links and page data
+  pub fn clear(&mut self) {
+    self.inner.clear();
+  }
 
-  
   // /// Set HTTP headers for request using [reqwest::header::HeaderMap](https://docs.rs/reqwest/latest/reqwest/header/struct.HeaderMap.html).
-  // pub fn with_headers(&mut self, headers: Option<Object>) -> &Self {
+  // pub fn with_headers(mut slf: PyRefMut<'_, Self>, headers: Option<Object>) -> PyRefMut<'_, Self> {
   //   use std::str::FromStr;
 
   //   match headers {
@@ -589,72 +577,69 @@ impl Website {
   //           _ => (),
   //         }
   //       }
-  //       self.inner.with_headers(Some(h));
+  //       slf.inner.with_headers(Some(h));
   //     }
   //     _ => {
-  //       self.inner.with_headers(None);
+  //       slf.inner.with_headers(None);
   //     }
   //   };
 
-  //   self
+  //   slf
   // }
 
-  // /// Add user agent to request.
-  
-  // pub fn with_user_agent(&mut self, user_agent: Option<&str>) -> &Self {
-  //   self.inner.configuration.with_user_agent(user_agent);
-  //   self
-  // }
+  /// Add user agent to request.
+  pub fn with_user_agent(mut slf: PyRefMut<'_, Self>, user_agent: Option<String>) -> PyRefMut<'_, Self> {
+    slf.inner.configuration.with_user_agent(user_agent.as_deref());
+    slf
+  }
 
-  // /// Respect robots.txt file.
-  
-  // pub fn with_respect_robots_txt(&mut self, respect_robots_txt: bool) -> &Self {
-  //   self
-  //     .inner
-  //     .configuration
-  //     .with_respect_robots_txt(respect_robots_txt);
-  //   self
-  // }
+  /// Respect robots.txt file.
+  pub fn with_respect_robots_txt(mut slf: PyRefMut<'_, Self>, respect_robots_txt: bool) -> PyRefMut<'_, Self>  {
+    slf
+      .inner
+      .configuration
+      .with_respect_robots_txt(respect_robots_txt);
+    slf
+  }
 
-  // /// Include subdomains detection.
-  
-  // pub fn with_subdomains(&mut self, subdomains: bool) -> &Self {
-  //   self.inner.configuration.with_subdomains(subdomains);
-  //   self
-  // }
+  /// Include subdomains detection.
+  pub fn with_subdomains(mut slf: PyRefMut<'_, Self>, subdomains: bool) -> PyRefMut<'_, Self> {
+    slf.inner.configuration.with_subdomains(subdomains);
+    slf
+  }
 
-  // /// Include tld detection.
-  
-  // pub fn with_tld(&mut self, tld: bool) -> &Self {
-  //   self.inner.configuration.with_tld(tld);
-  //   self
-  // }
+  /// Include tld detection.
+  pub fn with_tld(mut slf: PyRefMut<'_, Self>, tld: bool) -> PyRefMut<'_, Self> {
+    slf.inner.configuration.with_tld(tld);
+    slf
+  }
 
-  // /// Only use HTTP/2.
-  
-  // pub fn with_http2_prior_knowledge(&mut self, http2_prior_knowledge: bool) -> &Self {
-  //   self
-  //     .inner
-  //     .configuration
-  //     .with_http2_prior_knowledge(http2_prior_knowledge);
-  //   self
-  // }
+  /// Only use HTTP/2.
+  pub fn with_http2_prior_knowledge(mut slf: PyRefMut<'_, Self>, http2_prior_knowledge: bool) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_http2_prior_knowledge(http2_prior_knowledge);
+    slf
+  }
 
-  // /// Max time to wait for request duration to milliseconds.
-  
-  // pub fn with_request_timeout(&mut self, request_timeout: Option<u32>) -> &Self {
-  //   self
-  //     .inner
-  //     .configuration
-  //     .with_request_timeout(match request_timeout {
-  //       Some(d) => Some(Duration::from_millis(d.into())),
-  //       _ => None,
-  //     });
-  //   self
-  // }
+  /// Max time to wait for request duration to milliseconds.
+  pub fn with_request_timeout(mut slf: PyRefMut<'_, Self>, request_timeout: Option<u32>) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_request_timeout(match request_timeout {
+        Some(d) => Some(Duration::from_millis(d.into())),
+        _ => None,
+      });
+    slf
+  }
 
   /// add external domains
-  pub fn with_external_domains(mut slf: PyRefMut<'_, Self>, external_domains: Option<Vec<String>>) -> PyRefMut<'_, Self> {
+  pub fn with_external_domains(
+    mut slf: PyRefMut<'_, Self>,
+    external_domains: Option<Vec<String>>,
+  ) -> PyRefMut<'_, Self> {
     slf.inner.with_external_domains(match external_domains {
       Some(ext) => Some(ext.into_iter()),
       _ => None,
@@ -662,93 +647,99 @@ impl Website {
     slf
   }
 
-  
-  // /// Set the crawling budget
-  // pub fn with_budget(&mut self, budget: Option<std::collections::HashMap<String, u32>>) -> &Self {
-  //   use spider::hashbrown::hash_map::HashMap;
+  /// Set the crawling budget
+  pub fn with_budget(
+    mut slf: PyRefMut<'_, Self>,
+    budget: Option<std::collections::HashMap<String, u32>>,
+  ) -> PyRefMut<'_, Self> {
+    use spider::hashbrown::hash_map::HashMap;
 
-  //   match budget {
-  //     Some(d) => {
-  //       let v = d
-  //         .iter()
-  //         .map(|e| e.0.to_owned() + "," + &e.1.to_string())
-  //         .collect::<String>();
-  //       let v = v
-  //         .split(",")
-  //         .collect::<Vec<_>>()
-  //         .chunks(2)
-  //         .map(|x| (x[0], x[1].parse::<u32>().unwrap_or_default()))
-  //         .collect::<HashMap<&str, u32>>();
+    match budget {
+      Some(d) => {
+        let v = d
+          .iter()
+          .map(|e| e.0.to_owned() + "," + &e.1.to_string())
+          .collect::<String>();
+        let v = v
+          .split(",")
+          .collect::<Vec<_>>()
+          .chunks(2)
+          .map(|x| (x[0], x[1].parse::<u32>().unwrap_or_default()))
+          .collect::<HashMap<&str, u32>>();
 
-  //       self.inner.with_budget(Some(v));
-  //     }
-  //     _ => (),
-  //   }
+        slf.inner.with_budget(Some(v));
+      }
+      _ => (),
+    }
 
-  //   self
-  // }
+    slf
+  }
 
-  
-  // /// Regex black list urls from the crawl
-  // pub fn with_blacklist_url(&mut self, blacklist_url: Option<Vec<String>>) -> &Self {
-  //   self
-  //     .inner
-  //     .configuration
-  //     .with_blacklist_url(match blacklist_url {
-  //       Some(v) => {
-  //         let mut blacklist: Vec<CompactString> = Vec::new();
-  //         for item in v {
-  //           blacklist.push(CompactString::new(item));
-  //         }
-  //         Some(blacklist)
-  //       }
-  //       _ => None,
-  //     });
+  /// Regex black list urls from the crawl
+  pub fn with_blacklist_url(
+    mut slf: PyRefMut<'_, Self>,
+    blacklist_url: Option<Vec<String>>,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_blacklist_url(match blacklist_url {
+        Some(v) => {
+          let mut blacklist: Vec<CompactString> = Vec::new();
+          for item in v {
+            blacklist.push(CompactString::new(item));
+          }
+          Some(blacklist)
+        }
+        _ => None,
+      });
 
-  //   self
-  // }
+    slf
+  }
 
-  // /// Setup cron jobs to run
-  
-  // pub fn with_cron(&mut self, cron_str: String, cron_type: Option<String>) -> &Self {
-  //   self.inner.with_cron(
-  //     cron_str.as_str(),
-  //     if cron_type.unwrap_or_default() == "scrape" {
-  //       spider::website::CronType::Scrape
-  //     } else {
-  //       spider::website::CronType::Crawl
-  //     },
-  //   );
-  //   self
-  // }
+  /// Setup cron jobs to run
+  pub fn with_cron(
+    mut slf: PyRefMut<'_, Self>,
+    cron_str: String,
+    cron_type: Option<String>,
+  ) -> PyRefMut<'_, Self> {
+    slf.inner.with_cron(
+      cron_str.as_str(),
+      if cron_type.unwrap_or_default() == "scrape" {
+        spider::website::CronType::Scrape
+      } else {
+        spider::website::CronType::Crawl
+      },
+    );
+    slf
+  }
 
-  // /// Delay between request as ms.
-  
-  // pub fn with_delay(&mut self, delay: u32) -> &Self {
-  //   self.inner.configuration.with_delay(delay.into());
-  //   self
-  // }
+  /// Delay between request as ms.
+  pub fn with_delay(mut slf: PyRefMut<'_, Self>, delay: u32) -> PyRefMut<'_, Self> {
+    slf.inner.configuration.with_delay(delay.into());
+    slf
+  }
 
-  // /// Use proxies for request.
-  
-  // pub fn with_proxies(&mut self, proxies: Option<Vec<String>>) -> &Self {
-  //   self.inner.configuration.with_proxies(proxies);
-  //   self
-  // }
+  /// Use proxies for request.
+  pub fn with_proxies(
+    mut slf: PyRefMut<'_, Self>,
+    proxies: Option<Vec<String>>,
+  ) -> PyRefMut<'_, Self> {
+    slf.inner.configuration.with_proxies(proxies);
+    slf
+  }
 
-  
-  // /// build the inner website - not required for all builder_steps
-  // pub fn build(&mut self) -> &Self {
-  //   match self.inner.build() {
-  //     Ok(w) => self.inner = w,
-  //     _ => (),
-  //   }
-  //   self
-  // }
+  /// build the inner website - not required for all builder_steps
+  pub fn build(mut slf: PyRefMut<'_, Self>) -> PyRefMut<'_, Self> {
+    match slf.inner.build() {
+      Ok(w) => slf.inner = w,
+      _ => (),
+    }
+    slf
+  }
 }
 
 /// a runner for handling crons
-
 pub struct Cron {
   /// the runner task
   inner: spider::async_job::Runner,
@@ -756,10 +747,9 @@ pub struct Cron {
   cron_handle: Option<JoinHandle<()>>,
 }
 
-
 impl Cron {
   /// stop the cron instance
-  
+
   pub async unsafe fn stop(&mut self) {
     self.inner.stop().await;
     match &self.cron_handle {
