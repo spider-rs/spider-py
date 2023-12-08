@@ -1,0 +1,10 @@
+[book]
+authors = ["Jeff Mendez"]
+language = "en"
+multilingual = false
+src = "src"
+title = "spider-py"
+
+[output.html]
+git-repository-url = "https://github.com/spider-rs/spider-py/tree/main/book"
+edit-url-template  = "https://github.com/spider-rs/spider-py/edit/main/book/{path}"
