@@ -134,65 +134,70 @@ impl Website {
     id
   }
 
-  // /// remove a subscription listener.
-  // pub fn unsubscribe(&mut self, id: Option<u32>) -> bool {
-  //   match id {
-  //     Some(id) => {
-  //       let handle = self.subscription_handles.get(&id);
+  /// remove a subscription listener.
+  pub fn unsubscribe(&mut self, id: Option<u32>) -> bool {
+    match id {
+      Some(id) => {
+        let handle = self.subscription_handles.get(&id);
 
-  //       match handle {
-  //         Some(h) => {
-  //           h.abort();
-  //           self.subscription_handles.remove_entry(&id);
-  //           true
-  //         }
-  //         _ => false,
-  //       }
-  //     }
-  //     // we may want to get all subs and remove them
-  //     _ => {
-  //       let keys = self.subscription_handles.len();
-  //       for k in self.subscription_handles.drain(..) {
-  //         k.1.abort();
-  //       }
-  //       keys > 0
-  //     }
-  //   }
-  // }
+        match handle {
+          Some(h) => {
+            h.abort();
+            self.subscription_handles.remove_entry(&id);
+            true
+          }
+          _ => false,
+        }
+      }
+      // we may want to get all subs and remove them
+      _ => {
+        let keys = self.subscription_handles.len();
+        for k in self.subscription_handles.drain(..) {
+          k.1.abort();
+        }
+        keys > 0
+      }
+    }
+  }
 
-  // /// stop a crawl
-  // pub async unsafe fn stop(&mut self, id: Option<u32>) -> bool {
-  //   self.inner.stop();
+  /// stop a crawl
+  pub fn stop(mut slf: PyRefMut<'_, Self>, id: Option<u32>) -> bool {
+    slf.inner.stop();
 
-  //   // prevent the last background run
-  //   if self.running_in_background {
-  //     // we may want ID's to be used as an option along with urls for complete shutdowns.
-  //     shutdown(self.inner.get_domain().inner()).await;
-  //     self.running_in_background = false;
-  //   }
+    // prevent the last background run
+    if slf.running_in_background {
+      let domain_name = slf.inner.get_domain().inner().clone();
 
-  //   match id {
-  //     Some(id) => {
-  //       let handle = self.crawl_handles.get(&id);
+      let _ = pyo3_asyncio::tokio::future_into_py(slf.py(), async move {
+        shutdown(&domain_name).await;
+        Ok(())
+      });
 
-  //       match handle {
-  //         Some(h) => {
-  //           h.abort();
-  //           self.crawl_handles.remove_entry(&id);
-  //           true
-  //         }
-  //         _ => false,
-  //       }
-  //     }
-  //     _ => {
-  //       let keys = self.crawl_handles.len();
-  //       for k in self.crawl_handles.drain(..) {
-  //         k.1.abort();
-  //       }
-  //       keys > 0
-  //     }
-  //   }
-  // }
+      slf.running_in_background = false;
+    }
+
+    match id {
+      Some(id) => {
+        let handle = slf.crawl_handles.get(&id);
+
+        match handle {
+          Some(h) => {
+            h.abort();
+            slf.crawl_handles.remove_entry(&id);
+            true
+          }
+          _ => false,
+        }
+      }
+      _ => {
+        let keys = slf.crawl_handles.len();
+        for k in slf.crawl_handles.drain(..) {
+          k.1.abort();
+        }
+        keys > 0
+      }
+    }
+  }
 
   // /// crawl a website
   // pub async unsafe fn crawl(
