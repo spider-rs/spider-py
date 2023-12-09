@@ -3,6 +3,7 @@ use compact_str::CompactString;
 use indexmap::IndexMap;
 use pyo3::prelude::*;
 use spider::tokio::task::JoinHandle;
+use spider::tokio::select;
 use spider::utils::shutdown;
 use std::time::Duration;
 
@@ -200,8 +201,6 @@ impl Website {
       slf.running_in_background = background;
     }
 
-    // todo: cleanup crawl handles
-
     match on_page_event {
       Some(callback) => {
         if background {
@@ -245,46 +244,35 @@ impl Website {
             .subscribe(*BUFFER / 2)
             .expect("sync feature should be enabled");
 
-          let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
+          let py: Python<'_> = slf.py();
+          let rt = pyo3_asyncio::tokio::get_runtime();
+
+          let f1 = async {
             while let Ok(res) = rx2.recv().await {
               let page = new_page(&res, raw_content);
-
-              Python::with_gil(|py| {
-                let _ = callback.call(py, (page,), None);
-              });
+              let _ = callback.call(py, (page,), None);
             }
-          });
-
-          let id = match slf.subscription_handles.last() {
-            Some(handle) => handle.0 + 1,
-            _ => 0,
           };
 
-          slf.subscription_handles.insert(id, handle);
-
-          let ss = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let f2 = async {
             if headless {
               slf.inner.crawl().await;
             } else {
               slf.inner.crawl_raw().await;
             }
+          };
 
-            Ok::<PyRefMut<'_, Website>, ()>(slf)
-          });
-
-          match ss {
-            Ok(mut s) => {
-              let handle = s.subscription_handles.remove(&id);
-
-              match handle {
-                Some(s) => {
-                  s.abort();
-                }
-                _ => (),
+          rt.block_on(async move {
+            select! {
+              _ = f1 => {
+                  // println!("Sync receiver droped");
+              }
+              _ = f2 => {
+                  // println!("operation completed");
               }
             }
-            _ => (),
-          }
+          });
+          
         }
       }
       _ => {
@@ -346,6 +334,7 @@ impl Website {
             while let Ok(res) = rx2.recv().await {
               let page = new_page(&res, raw_content);
 
+              // todo: remove global lock page events
               Python::with_gil(|py| {
                 let _ = callback.call(py, (page,), None);
               });
@@ -378,45 +367,34 @@ impl Website {
             .subscribe(*BUFFER / 2)
             .expect("sync feature should be enabled");
 
-          let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
+          let py: Python<'_> = slf.py();
+          let rt = pyo3_asyncio::tokio::get_runtime();
+
+          let f1 = async {
             while let Ok(res) = rx2.recv().await {
               let page = new_page(&res, raw_content);
-
-              Python::with_gil(|py| {
-                let _ = callback.call(py, (page,), None);
-              });
+              let _ = callback.call(py, (page,), None);
             }
-          });
-
-          let id = match slf.subscription_handles.last() {
-            Some(handle) => handle.0 + 1,
-            _ => 0,
           };
 
-          slf.subscription_handles.insert(id, handle);
-
-          let ss = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let f2 = async {
             if headless {
               slf.inner.scrape().await;
             } else {
               slf.inner.scrape_raw().await;
             }
-            Ok::<PyRefMut<'_, Website>, ()>(slf)
-          });
+          };
 
-          match ss {
-            Ok(mut s) => {
-              let handle = s.subscription_handles.remove(&id);
-
-              match handle {
-                Some(s) => {
-                  s.abort();
-                }
-                _ => (),
+          rt.block_on(async move {
+            select! {
+              _ = f1 => {
+                  println!("Sync receiver droped");
+              }
+              _ = f2 => {
+                  println!("operation completed");
               }
             }
-            _ => (),
-          }
+          });
         }
       }
       _ => {
@@ -496,8 +474,9 @@ impl Website {
   }
 
   /// get the size of the website in amount of pages crawled. If you ran the page in the background, this value will not update.
-  pub fn size(&mut self) -> u32 {
-    self.inner.size() as u32
+  #[getter]
+  pub fn size(slf: PyRef<'_, Self>) -> u32 {
+    slf.inner.size() as u32
   }
 
   /// get the configuration custom HTTP headers
@@ -563,7 +542,6 @@ impl Website {
     mut slf: PyRefMut<'_, Self>,
     headers: Option<PyObject>,
   ) -> PyRefMut<'_, Self> {
-    use pyo3::types::PyDict;
     use std::str::FromStr;
     match headers {
       Some(obj) => {
