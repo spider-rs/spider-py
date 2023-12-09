@@ -1,7 +1,9 @@
 use compact_str::CompactString;
+use pyo3::{pyclass, pymethods, PyRef, PyRefMut};
 
 /// a simple page object
 #[derive(Default)]
+#[pyclass]
 pub struct Page {
   /// the page object from spider
   inner: Option<spider::page::Page>,
@@ -17,8 +19,10 @@ pub struct Page {
   pub status_code: u16,
 }
 
+#[pymethods]
 impl Page {
   /// a new page
+  #[new]
   pub fn new(url: String, subdomains: Option<bool>, tld: Option<bool>) -> Self {
     Page {
       url,
@@ -29,24 +33,36 @@ impl Page {
   }
 
   /// get the page content
-  pub async unsafe fn fetch(&mut self) -> &Self {
-    let page = spider::page::Page::new_page(&self.url, &Default::default()).await;
-    self.status_code = page.status_code.into();
-    self.inner = Some(page);
-    self.selectors = spider::page::get_page_selectors(
-      &self.url,
-      self.subdomains.unwrap_or_default(),
-      self.tld.unwrap_or_default(),
-    );
-    self
+  pub fn fetch(mut slf: PyRefMut<'_, Self>) -> PyRefMut<'_, Self> {
+    let s = pyo3_asyncio::tokio::get_runtime()
+      .block_on(async move {
+        let page = spider::page::Page::new_page(&slf.url, &Default::default()).await;
+        slf.status_code = page.status_code.into();
+        slf.inner = Some(page);
+        slf.selectors = spider::page::get_page_selectors(
+          &slf.url,
+          slf.subdomains.unwrap_or_default(),
+          slf.tld.unwrap_or_default(),
+        );
+        Ok::<PyRefMut<'_, Page>, ()>(slf)
+      })
+      .unwrap();
+
+    s
   }
 
   /// all links on the page
-  pub async fn get_links(&self) -> Vec<String> {
-    match &self.selectors {
-      Some(selectors) => match &self.inner {
+  pub fn get_links(slf: PyRef<'_, Self>) -> Vec<String> {
+    match &slf.selectors {
+      Some(selectors) => match &slf.inner {
         Some(inner) => {
-          let links = inner.links(&selectors).await;
+          let links = pyo3_asyncio::tokio::get_runtime()
+            .block_on(async move {
+              let links = inner.links(&selectors).await;
+              Ok::<spider::hashbrown::HashSet<spider::CaseInsensitiveString>, ()>(links)
+            })
+            .unwrap_or_default();
+
           links
             .into_iter()
             .map(|i| i.as_ref().to_string())

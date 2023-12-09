@@ -42,7 +42,7 @@ Install maturin `pipx install maturin` and python.
 
 ## Todo
 
-1. Port Page function.
+1. Fix http headers custom assign.
 1. Add better docs.
 
 Once these items are done the base of the module should be complete. Most of the code comes from the initial port to Node.js that was done.

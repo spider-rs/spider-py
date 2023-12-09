@@ -7,23 +7,6 @@ use spider::tokio::task::JoinHandle;
 use spider::utils::shutdown;
 use std::time::Duration;
 
-#[pyfunction]
-fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<&PyAny> {
-  pyo3_asyncio::tokio::future_into_py(py, async move {
-    let w = crate::crawl(url, raw_content).await;
-
-    Ok(w)
-  })
-}
-
-#[pymodule]
-fn spider_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
-  m.add_function(wrap_pyfunction!(crawl, m)?)?;
-  m.add_class::<Website>()?;
-
-  Ok(())
-}
-
 /// a website holding the inner spider::website::Website from Rust fit for python.
 #[pyclass]
 pub struct Website {
@@ -481,6 +464,31 @@ impl Website {
     self.inner.size() as u32
   }
 
+  /// get the configuration custom HTTP headers
+  pub fn get_configuration_headers(&self) -> Vec<(String, String)> {
+    let mut map = Vec::new();
+
+    match self.inner.configuration.headers.as_ref() {
+      Some(h) => {
+        for v in h.iter() {
+          let mut value = String::new();
+
+          match v.1.to_str() {
+            Ok(vv) => {
+              value.push_str(vv);
+            }
+            _ => (),
+          };
+
+          map.push((v.0.to_string(), value))
+        }
+      }
+      _ => (),
+    }
+
+    map
+  }
+
   /// get all the pages of a website - requires calling website.scrape
   pub fn get_pages(&self) -> Vec<NPage> {
     let mut pages: Vec<NPage> = Vec::new();
@@ -514,44 +522,57 @@ impl Website {
     self.inner.clear();
   }
 
-  // /// Set HTTP headers for request using [reqwest::header::HeaderMap](https://docs.rs/reqwest/latest/reqwest/header/struct.HeaderMap.html).
-  // pub fn with_headers(mut slf: PyRefMut<'_, Self>, headers: Option<Object>) -> PyRefMut<'_, Self> {
-  //   use std::str::FromStr;
+  /// Set HTTP headers for request using [reqwest::header::HeaderMap](https://docs.rs/reqwest/latest/reqwest/header/struct.HeaderMap.html).
+  pub fn with_headers(
+    mut slf: PyRefMut<'_, Self>,
+    headers: Option<PyObject>,
+  ) -> PyRefMut<'_, Self> {
+    use std::str::FromStr;
 
-  //   match headers {
-  //     Some(obj) => {
-  //       let mut h = spider::reqwest::header::HeaderMap::new();
-  //       let keys = Object::keys(&obj).unwrap_or_default();
+    match headers {
+      Some(obj) => {
+        let mut h = spider::reqwest::header::HeaderMap::new();
 
-  //       for key in keys.into_iter() {
-  //         let header_key = spider::reqwest::header::HeaderName::from_str(&key);
+        match obj.as_ref(slf.py()).iter() {
+          Ok(keys) => {
+            for key in keys.into_iter() {
+              match key {
+                Ok(k) => {
+                  let key_name = k.to_string();
+                  let header_key = spider::reqwest::header::HeaderName::from_str(&key_name);
 
-  //         match header_key {
-  //           Ok(hn) => {
-  //             let header_value = obj
-  //               .get::<String, String>(key)
-  //               .unwrap_or_default()
-  //               .unwrap_or_default();
+                  match header_key {
+                    Ok(hn) => match k.get_item(key_name) {
+                      Ok(he) => {
+                        let header_value = he.to_string();
 
-  //             match spider::reqwest::header::HeaderValue::from_str(&header_value) {
-  //               Ok(hk) => {
-  //                 h.append(hn, hk);
-  //               }
-  //               _ => (),
-  //             }
-  //           }
-  //           _ => (),
-  //         }
-  //       }
-  //       slf.inner.with_headers(Some(h));
-  //     }
-  //     _ => {
-  //       slf.inner.with_headers(None);
-  //     }
-  //   };
+                        match spider::reqwest::header::HeaderValue::from_str(&header_value) {
+                          Ok(hk) => {
+                            h.append(hn, hk);
+                          }
+                          _ => (),
+                        }
+                      }
+                      _ => (),
+                    },
+                    _ => (),
+                  }
+                }
+                _ => (),
+              }
+            }
+            slf.inner.with_headers(Some(h));
+          }
+          _ => (),
+        }
+      }
+      _ => {
+        slf.inner.with_headers(None);
+      }
+    };
 
-  //   slf
-  // }
+    slf
+  }
 
   /// Add user agent to request.
   pub fn with_user_agent(
