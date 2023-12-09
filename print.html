@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">3.</strong> Environment</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">4.</strong> Environment</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -204,6 +204,38 @@ async def main():
     website = await crawl(&quot;https://jeffmendez.com&quot;)
     print(website.links)
     # print(website.pages)
+
+asyncio.run(main())
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="website"><a class="header" href="#website">Website</a></h1>
+<p>The website class is the foundation to Spider.</p>
+<h2 id="builder"><a class="header" href="#builder">Builder</a></h2>
+<p>We use the builder pattern to configure our crawler.</p>
+<pre><code class="language-python">import asyncio
+
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;, False).with_headers({ &quot;authorization&quot;: &quot;myjwttoken&quot; })
+
+asyncio.run(main())
+</code></pre>
+<h2 id="subscriptions"><a class="header" href="#subscriptions">Subscriptions</a></h2>
+<pre><code class="language-python">import asyncio
+
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self): 
+        print(&quot;Subscription Created...&quot;) 
+    def __call__(self, page): 
+        print(page.url + &quot; - status: &quot; + str(page.status_code)) 
+        # uncomment to perform extra parsing and get the page title 
+        # print(page.url + &quot; - title: &quot; + page.title()) 
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;, False)
+    website.crawl(Subscription())
 
 asyncio.run(main())
 </code></pre>
