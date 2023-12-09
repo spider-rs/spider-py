@@ -208,34 +208,204 @@ async def main():
 asyncio.run(main())
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="website"><a class="header" href="#website">Website</a></h1>
-<p>The website class is the foundation to Spider.</p>
-<h2 id="builder"><a class="header" href="#builder">Builder</a></h2>
-<p>We use the builder pattern to configure our crawler.</p>
-<pre><code class="language-python">import asyncio
-
+<p>The Website class is the foundations to the spider.</p>
+<h2 id="builder-pattern"><a class="header" href="#builder-pattern">Builder pattern</a></h2>
+<p>We use the builder pattern to configure the website for crawling.</p>
+<p>*note: Replace <code>https://choosealicense.com</code> from the examples below with your website target URL.</p>
+<pre><code class="language-py">import asyncio
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;, False).with_headers({ &quot;authorization&quot;: &quot;myjwttoken&quot; })
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl()
+    print(website.get_links())
 
 asyncio.run(main())
 </code></pre>
-<h2 id="subscriptions"><a class="header" href="#subscriptions">Subscriptions</a></h2>
-<pre><code class="language-python">import asyncio
+<h3 id="custom-headers"><a class="header" href="#custom-headers">Custom Headers</a></h3>
+<p>Add custom HTTP headers to use when crawling/scraping.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
 
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_headers({ &quot;authorization&quot;: &quot;mytoken&quot;})
+
+asyncio.run(main())
+</code></pre>
+<h3 id="blacklist"><a class="header" href="#blacklist">Blacklist</a></h3>
+<p>Prevent crawling a set path, url, or pattern with Regex.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_blacklist_url([&quot;/blog&quot;, &quot;/resume&quot;])
+
+asyncio.run(main())
+</code></pre>
+<h3 id="crons"><a class="header" href="#crons">Crons</a></h3>
+<p>Setup a cron job that can run at any time in the background using cron-syntax.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_cron(&quot;1/5 * * * * *&quot;)
+
+asyncio.run(main())
+</code></pre>
+<p>View the <a href="./cron-job.html">cron</a> section for details how to use the cron.</p>
+<h3 id="budget"><a class="header" href="#budget">Budget</a></h3>
+<p>Add a crawl budget that prevents crawling <code>x</code> amount of pages.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_budget({
+    &quot;*&quot;: 1,
+  })
+
+asyncio.run(main())
+</code></pre>
+<h3 id="subdomains"><a class="header" href="#subdomains">Subdomains</a></h3>
+<p>Include subdomains in request.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_subdomains(True)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="tld"><a class="header" href="#tld">TLD</a></h3>
+<p>Include TLDs in request.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_tlds(True)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="external-domains"><a class="header" href="#external-domains">External Domains</a></h3>
+<p>Add external domains to include with the website.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_external_domains([&quot;https://www.myotherdomain.com&quot;])
+
+asyncio.run(main())
+</code></pre>
+<h3 id="proxy"><a class="header" href="#proxy">Proxy</a></h3>
+<p>Use a proxy to crawl a website.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_proxies([&quot;https://www.myproxy.com&quot;])
+
+asyncio.run(main())
+</code></pre>
+<h3 id="delays"><a class="header" href="#delays">Delays</a></h3>
+<p>Add delays between pages. Defaults to none.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_delays(200)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="user-agent"><a class="header" href="#user-agent">User-Agent</a></h3>
+<p>Use a custom User-Agent.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_user_agent(&quot;mybot/v1&quot;)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="request-timeout"><a class="header" href="#request-timeout">Request Timeout</a></h3>
+<p>Add a request timeout per page in miliseconds. Example shows 30 seconds.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_request_timeout(30000)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="respect-robots"><a class="header" href="#respect-robots">Respect Robots</a></h3>
+<p>Respect the robots.txt file.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_respect_robots_txt(True)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="http2-prior-knowledge"><a class="header" href="#http2-prior-knowledge">Http2 Prior Knowledge</a></h3>
+<p>Use http2 to connect if you know the website servers supports this.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_http2_prior_knowledge(True)
+
+asyncio.run(main())
+</code></pre>
+<h2 id="chaining"><a class="header" href="#chaining">Chaining</a></h2>
+<p>You can chain all of the configs together for simple configuration.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_subdomains(true).with_tlds(true).with_user_agent(&quot;mybot/v1&quot;).with_respect_robots_txt(true)
+
+asyncio.run(main())
+</code></pre>
+<h2 id="raw-content"><a class="header" href="#raw-content">Raw Content</a></h2>
+<p>Set the second param of the website constructor to <code>true</code> to return content without UTF-8.
+This will return <code>rawContent</code> and leave <code>content</code> when using subscriptions or the Page Object.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;, True)
+    website.scrape()
+
+asyncio.run(main())
+</code></pre>
+<h2 id="clearing-crawl-data"><a class="header" href="#clearing-crawl-data">Clearing Crawl Data</a></h2>
+<p>Use <code>website.clear</code> to remove the links visited and page data or <code>website.drain_links</code> to drain the links visited.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl()
+    print(website.getLinks())
+    website.clear()
+    print(website.getLinks())
+
+asyncio.run(main())
+</code></pre>
+<h2 id="stop-crawl"><a class="header" href="#stop-crawl">Stop crawl</a></h2>
+<p>To stop a crawl you can use <code>website.stopCrawl(id)</code>, pass in the crawl id to stop a run or leave empty for all crawls to stop.</p>
+<pre><code class="language-py">import asyncio
 from spider_rs import Website
 
 class Subscription:
     def __init__(self): 
         print(&quot;Subscription Created...&quot;) 
     def __call__(self, page): 
-        print(page.url + &quot; - status: &quot; + str(page.status_code)) 
-        # uncomment to perform extra parsing and get the page title 
-        # print(page.url + &quot; - title: &quot; + page.title()) 
+        print(page.url + &quot; - status: &quot; + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;, False)
+    website = Website(&quot;https://choosealicense.com&quot;)
     website.crawl(Subscription())
+    website.stop()
 
 asyncio.run(main())
 </code></pre>
