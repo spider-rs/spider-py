@@ -1,4 +1,4 @@
-use crate::NPage;
+use crate::new_page;
 use crate::NWebsite;
 use crate::BUFFER;
 
@@ -13,7 +13,7 @@ pub async fn crawl(url: String, raw_content: Option<bool>) -> NWebsite {
 
   spider::tokio::spawn(async move {
     while let Ok(res) = rx2.recv().await {
-      if let Err(_) = tx.send(NPage::new(&res, raw_content)).await {
+      if let Err(_) = tx.send(new_page(&res, raw_content)).await {
         println!("receiver dropped");
         return;
       }

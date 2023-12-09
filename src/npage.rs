@@ -28,24 +28,27 @@ pub fn page_title(page: NPage) -> String {
   page.title()
 }
 
-impl NPage {
-  /// establish a new page
-  pub fn new(res: &spider::page::Page, raw: bool) -> NPage {
-    NPage {
-      url: res.get_url().into(),
-      status_code: res.status_code.as_u16(),
-      content: if raw {
-        Default::default()
-      } else {
-        res.get_html()
-      },
-      raw_content: if raw {
-        Some(res.get_html_bytes_u8().into())
-      } else {
-        None
-      },
-    }
+/// get a new Page
+pub fn new_page(res: &spider::page::Page, raw: bool) -> NPage {
+  NPage {
+    url: res.get_url().into(),
+    status_code: res.status_code.as_u16(),
+    content: if raw {
+      Default::default()
+    } else {
+      res.get_html()
+    },
+    raw_content: if raw {
+      Some(res.get_html_bytes_u8().into())
+    } else {
+      None
+    },
   }
+}
+
+#[pymethods]
+impl NPage {
+  fn __call__(&self) {}
 
   /// the html page title.
   pub fn title(&self) -> String {

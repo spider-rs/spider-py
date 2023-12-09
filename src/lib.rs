@@ -13,7 +13,7 @@ pub mod page;
 pub mod shortcut;
 pub mod website;
 
-pub use npage::{page_title, NPage};
+pub use npage::{new_page, page_title, NPage};
 pub use nwebsite::NWebsite;
 pub use page::Page;
 pub use website::Website;

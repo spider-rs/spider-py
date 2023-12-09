@@ -1,5 +1,4 @@
-use crate::NPage;
-use crate::BUFFER;
+use crate::{new_page, NPage, BUFFER};
 use compact_str::CompactString;
 use indexmap::IndexMap;
 use pyo3::prelude::*;
@@ -102,7 +101,7 @@ impl Website {
 
     let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
       while let Ok(res) = rx2.recv().await {
-        let page = NPage::new(&res, raw_content);
+        let page = new_page(&res, raw_content);
         Python::with_gil(|py| {
           let _ = on_page_event.call(py, (page, 0), None);
         });
@@ -201,6 +200,8 @@ impl Website {
       slf.running_in_background = background;
     }
 
+    // todo: cleanup crawl handles
+
     match on_page_event {
       Some(callback) => {
         if background {
@@ -211,9 +212,9 @@ impl Website {
 
           let handle = spider::tokio::spawn(async move {
             while let Ok(res) = rx2.recv().await {
-              let page = NPage::new(&res, raw_content);
+              let page = new_page(&res, raw_content);
               Python::with_gil(|py| {
-                let _ = callback.call(py, (page, 0), None);
+                let _ = callback.call(py, (page,), None);
               });
             }
           });
@@ -246,8 +247,10 @@ impl Website {
 
           let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
             while let Ok(res) = rx2.recv().await {
+              let page = new_page(&res, raw_content);
+
               Python::with_gil(|py| {
-                let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+                let _ = callback.call(py, (page,), None);
               });
             }
           });
@@ -259,14 +262,29 @@ impl Website {
 
           slf.subscription_handles.insert(id, handle);
 
-          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let ss = pyo3_asyncio::tokio::get_runtime().block_on(async move {
             if headless {
               slf.inner.crawl().await;
             } else {
               slf.inner.crawl_raw().await;
             }
-            Ok::<(), ()>(())
+
+            Ok::<PyRefMut<'_, Website>, ()>(slf)
           });
+
+          match ss {
+            Ok(mut s) => {
+              let handle = s.subscription_handles.remove(&id);
+
+              match handle {
+                Some(s) => {
+                  s.abort();
+                }
+                _ => (),
+              }
+            }
+            _ => (),
+          }
         }
       }
       _ => {
@@ -326,8 +344,10 @@ impl Website {
 
           let handle = spider::tokio::spawn(async move {
             while let Ok(res) = rx2.recv().await {
+              let page = new_page(&res, raw_content);
+
               Python::with_gil(|py| {
-                let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+                let _ = callback.call(py, (page,), None);
               });
             }
           });
@@ -360,8 +380,10 @@ impl Website {
 
           let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
             while let Ok(res) = rx2.recv().await {
+              let page = new_page(&res, raw_content);
+
               Python::with_gil(|py| {
-                let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+                let _ = callback.call(py, (page,), None);
               });
             }
           });
@@ -373,14 +395,28 @@ impl Website {
 
           slf.subscription_handles.insert(id, handle);
 
-          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let ss = pyo3_asyncio::tokio::get_runtime().block_on(async move {
             if headless {
               slf.inner.scrape().await;
             } else {
               slf.inner.scrape_raw().await;
             }
-            Ok::<(), ()>(())
+            Ok::<PyRefMut<'_, Website>, ()>(slf)
           });
+
+          match ss {
+            Ok(mut s) => {
+              let handle = s.subscription_handles.remove(&id);
+
+              match handle {
+                Some(s) => {
+                  s.abort();
+                }
+                _ => (),
+              }
+            }
+            _ => (),
+          }
         }
       }
       _ => {
@@ -428,7 +464,7 @@ impl Website {
         let handler = spider::tokio::spawn(async move {
           while let Ok(res) = rx2.recv().await {
             Python::with_gil(|py| {
-              let _ = callback.call(py, (NPage::new(&res, raw_content), 0), None);
+              let _ = callback.call(py, (new_page(&res, raw_content),), None);
             });
           }
         });
@@ -497,7 +533,7 @@ impl Website {
     match self.inner.get_pages() {
       Some(p) => {
         for page in p.iter() {
-          pages.push(NPage::new(page, raw_content));
+          pages.push(new_page(page, raw_content));
         }
       }
       _ => (),

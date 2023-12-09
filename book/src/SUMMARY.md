@@ -9,5 +9,6 @@
 
 # Configuration
 
+- [Website](./website.md)
 - [Environment](./env.md)
 
