@@ -9,7 +9,6 @@ class MySpider(CrawlSpider):
     allowed_domains = ['rsseau.fr']
     start_urls = ['https://rsseau.fr']
     links = []
-
     rules = (
         Rule(LinkExtractor(), callback='parse_item', follow=True),
     )

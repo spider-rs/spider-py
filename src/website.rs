@@ -527,34 +527,27 @@ impl Website {
     mut slf: PyRefMut<'_, Self>,
     headers: Option<PyObject>,
   ) -> PyRefMut<'_, Self> {
+    use pyo3::types::PyDict;
     use std::str::FromStr;
-
     match headers {
       Some(obj) => {
         let mut h = spider::reqwest::header::HeaderMap::new();
+        let py = slf.py();
+        let dict = obj.downcast::<pyo3::types::PyDict>(py);
 
-        match obj.as_ref(slf.py()).iter() {
+        match dict {
           Ok(keys) => {
             for key in keys.into_iter() {
-              match key {
-                Ok(k) => {
-                  let key_name = k.to_string();
-                  let header_key = spider::reqwest::header::HeaderName::from_str(&key_name);
+              let header_key = spider::reqwest::header::HeaderName::from_str(&key.0.to_string());
 
-                  match header_key {
-                    Ok(hn) => match k.get_item(key_name) {
-                      Ok(he) => {
-                        let header_value = he.to_string();
+              match header_key {
+                Ok(hn) => {
+                  let header_value = key.1.to_string();
 
-                        match spider::reqwest::header::HeaderValue::from_str(&header_value) {
-                          Ok(hk) => {
-                            h.append(hn, hk);
-                          }
-                          _ => (),
-                        }
-                      }
-                      _ => (),
-                    },
+                  match spider::reqwest::header::HeaderValue::from_str(&header_value) {
+                    Ok(hk) => {
+                      h.append(hn, hk);
+                    }
                     _ => (),
                   }
                 }
