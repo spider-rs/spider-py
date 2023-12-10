@@ -66,10 +66,10 @@ Install maturin `pipx install maturin` and python.
 View [bench](./bench/) to see the results. The library should run faster than scrappy by at least 2x for normal workflows and up to 100,000x for large websites.
 The speed increases drastically as we harness isolated concurrency from Rust.
 
-## Todo
+## TODO
 
-1. Fix http headers custom assign.
-1. Add better docs.
-1. Fix benchmarks.
+1. Fix stop concurrent crawl.
 
-Once these items are done the base of the module should be complete. Most of the code comes from the initial port to Node.js that was done.
+## Issues
+
+Please submit a Github issue for any issues found.
