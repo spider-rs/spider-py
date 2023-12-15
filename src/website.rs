@@ -2,8 +2,8 @@ use crate::{new_page, NPage, BUFFER};
 use compact_str::CompactString;
 use indexmap::IndexMap;
 use pyo3::prelude::*;
-use spider::tokio::task::JoinHandle;
 use spider::tokio::select;
+use spider::tokio::task::JoinHandle;
 use spider::utils::shutdown;
 use std::time::Duration;
 
@@ -272,7 +272,6 @@ impl Website {
               }
             }
           });
-          
         }
       }
       _ => {
@@ -300,6 +299,109 @@ impl Website {
             } else {
               slf.inner.crawl_raw().await;
             }
+            Ok::<(), ()>(())
+          });
+        }
+      }
+    };
+  }
+
+  /// crawl a website smart mode
+  pub fn crawl_smart(
+    mut slf: PyRefMut<'_, Self>,
+    on_page_event: Option<PyObject>,
+    background: Option<bool>,
+  ) {
+    // only run in background if on_page_event is handled for streaming.
+    let background = background.is_some() && background.unwrap_or_default();
+    let raw_content = slf.raw_content;
+
+    if background {
+      slf.running_in_background = background;
+    }
+
+    match on_page_event {
+      Some(callback) => {
+        if background {
+          let mut website = slf.inner.clone();
+          let mut rx2 = website
+            .subscribe(*BUFFER / 2)
+            .expect("sync feature should be enabled");
+
+          let handle = spider::tokio::spawn(async move {
+            while let Ok(res) = rx2.recv().await {
+              let page = new_page(&res, raw_content);
+              Python::with_gil(|py| {
+                let _ = callback.call(py, (page,), None);
+              });
+            }
+          });
+
+          let crawl_id = match slf.crawl_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
+
+          let crawl_handle = spider::tokio::spawn(async move {
+            website.crawl_smart().await;
+          });
+
+          let id = match slf.subscription_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
+
+          slf.crawl_handles.insert(crawl_id, crawl_handle);
+          slf.subscription_handles.insert(id, handle);
+        } else {
+          let mut rx2 = slf
+            .inner
+            .subscribe(*BUFFER / 2)
+            .expect("sync feature should be enabled");
+
+          let py: Python<'_> = slf.py();
+          let rt = pyo3_asyncio::tokio::get_runtime();
+
+          let f1 = async {
+            while let Ok(res) = rx2.recv().await {
+              let page = new_page(&res, raw_content);
+              let _ = callback.call(py, (page,), None);
+            }
+          };
+
+          let f2 = async {
+            slf.inner.crawl_smart().await;
+          };
+
+          rt.block_on(async move {
+            select! {
+              _ = f1 => {
+                  // println!("Sync receiver droped");
+              }
+              _ = f2 => {
+                  // println!("operation completed");
+              }
+            }
+          });
+        }
+      }
+      _ => {
+        if background {
+          let mut website = slf.inner.clone();
+
+          let crawl_id = match slf.crawl_handles.last() {
+            Some(handle) => handle.0 + 1,
+            _ => 0,
+          };
+
+          let crawl_handle = spider::tokio::spawn(async move {
+            website.crawl_smart().await;
+          });
+
+          slf.crawl_handles.insert(crawl_id, crawl_handle);
+        } else {
+          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+            slf.inner.crawl_smart().await;
             Ok::<(), ()>(())
           });
         }
@@ -388,10 +490,10 @@ impl Website {
           rt.block_on(async move {
             select! {
               _ = f1 => {
-                  println!("Sync receiver droped");
+                  // println!("Sync receiver droped");
               }
               _ = f2 => {
-                  println!("operation completed");
+                  // println!("operation completed");
               }
             }
           });
@@ -703,6 +805,18 @@ impl Website {
         _ => None,
       });
 
+    slf
+  }
+
+  /// Use network interception for the request to only allow content that matches the host. If the content is from a 3rd party it needs to be part of our include list.
+  pub fn with_chrome_intercept(
+    mut slf: PyRefMut<'_, Self>,
+    chrome_intercept: bool,
+    block_images: bool,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .with_chrome_intercept(chrome_intercept, block_images);
     slf
   }
 
