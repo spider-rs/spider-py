@@ -1,4 +1,4 @@
-use compact_str::CompactString;
+use spider::compact_str::CompactString;
 use pyo3::{pyclass, pymethods, PyRef, PyRefMut};
 
 /// a simple page object

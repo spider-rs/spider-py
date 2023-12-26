@@ -1,5 +1,5 @@
 use crate::{new_page, NPage, BUFFER};
-use compact_str::CompactString;
+use spider::compact_str::CompactString;
 use indexmap::IndexMap;
 use pyo3::prelude::*;
 use spider::tokio::select;
