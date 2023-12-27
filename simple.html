@@ -197,6 +197,38 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
+<h3 id="events"><a class="header" href="#events">Events</a></h3>
+<p>You can pass an object that could be async as param to <code>crawl</code> and <code>scrape</code>.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - status: &quot; + str(page.status_code))
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl(Subscription())
+
+asyncio.run(main())
+</code></pre>
+<h3 id="selector"><a class="header" href="#selector">Selector</a></h3>
+<p>The <code>title</code> method allows you to extract the title of the page.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - title: &quot; + str(page.title()))
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl(Subscription())
+</code></pre>
 <h2 id="shortcut"><a class="header" href="#shortcut">Shortcut</a></h2>
 <p>You can use the <code>crawl</code> shortcut method to collect contents quickly without configuration.</p>
 <pre><code class="language-ts">import asyncio
