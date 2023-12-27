@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="page.html"><strong aria-hidden="true">4.</strong> Page</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">5.</strong> Environment</a></li><li class="chapter-item expanded affix "><li class="part-title">Usage</li><li class="chapter-item expanded "><a href="cron-job.html"><strong aria-hidden="true">6.</strong> Cron Job</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="page.html"><strong aria-hidden="true">4.</strong> Page</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">5.</strong> Environment</a></li><li class="chapter-item expanded affix "><li class="part-title">Usage</li><li class="chapter-item expanded "><a href="crawl.html"><strong aria-hidden="true">6.</strong> Crawl</a></li><li class="chapter-item expanded "><a href="scrape.html"><strong aria-hidden="true">7.</strong> Scrape</a></li><li class="chapter-item expanded "><a href="cron-job.html"><strong aria-hidden="true">8.</strong> Cron Job</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -436,9 +436,9 @@ asyncio.run(main())
 from spider_rs import Website
 
 class Subscription:
-    def __init__(self): 
-        print(&quot;Subscription Created...&quot;) 
-    def __call__(self, page): 
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
         print(page.url + &quot; - status: &quot; + str(page.status_code))
 
 async def main():
@@ -508,15 +508,129 @@ asyncio.run(main())
 <p>You can set the chrome URL to connect remotely.</p>
 <pre><code class="language-sh">CHROME_URL=http://localhost:9222
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="crawl"><a class="header" href="#crawl">Crawl</a></h1>
+<p>Crawl a website concurrently.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://rsseau.fr&quot;)
+    website.crawl()
+    print(website.get_links())
+
+asyncio.run(main())
+</code></pre>
+<h2 id="async-event"><a class="header" href="#async-event">Async Event</a></h2>
+<p>You can pass in a async function as the first param to the crawl function for realtime updates streamed.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - status: &quot; + str(page.status_code))
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl(Subscription())
+
+asyncio.run(main())
+</code></pre>
+<h2 id="background"><a class="header" href="#background">Background</a></h2>
+<p>You can run the request in the background and receive events with the second param set to <code>true</code>.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - status: &quot; + str(page.status_code))
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl(Subscription(), True)
+    # this will run instantly as the crawl is in the background
+
+asyncio.run(main())
+</code></pre>
+<h2 id="subscriptions"><a class="header" href="#subscriptions">Subscriptions</a></h2>
+<p>You can setup many subscriptions to run events when a crawl happens.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - status: &quot; + str(page.status_code))
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl()
+    subscription_id = website.subscribe(Subscription());
+    website.crawl()
+    website.unsubscribe(subscription_id);
+
+asyncio.run(main())
+</code></pre>
+<h2 id="headless-chrome"><a class="header" href="#headless-chrome">Headless Chrome</a></h2>
+<p>Headless Chrome rendering can be done by setting the third param in <code>crawl</code> or <code>scrape</code> to <code>true</code>.
+It will attempt to connect to chrome running remotely if the <code>CHROME_URL</code> env variable is set with chrome launching as a fallback. Using a remote connection with <code>CHROME_URL</code> will
+drastically speed up runs.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - status: &quot; + str(page.status_code))
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl(Subscription(), false, True)
+
+asyncio.run(main())
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="scrape"><a class="header" href="#scrape">Scrape</a></h1>
+<p>Scape a website and collect the resource data.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.scrape()
+    print(website.get_pages())
+    # [ { url: &quot;https://rsseau.fr/blog&quot;, html: &quot;&lt;html&gt;...&lt;/html&gt;&quot;}, ...]
+
+asyncio.run(main())
+</code></pre>
+<h2 id="headless-chrome-1"><a class="header" href="#headless-chrome-1">Headless Chrome</a></h2>
+<p>Headless Chrome rendering can be done by setting the third param in <code>crawl</code> or <code>scrape</code> to <code>true</code>.
+It will attempt to connect to chrome running remotely if the <code>CHROME_URL</code> env variable is set with chrome launching as a fallback. Using a remote connection with <code>CHROME_URL</code> will
+drastically speed up runs.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.scrape(NULL, NULL, True)
+    print(website.get_pages())
+    # [ { url: &quot;https://rsseau.fr/blog&quot;, html: &quot;&lt;html&gt;...&lt;/html&gt;&quot;}, ...]
+
+asyncio.run(main())
+</code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="cron-jobs"><a class="header" href="#cron-jobs">Cron Jobs</a></h1>
 <p>Use a cron job that can run any time of day to gather website data.</p>
 <pre><code class="language-python">import asyncio
 from spider_rs import Website
 
 class Subscription:
-    def __init__(self): 
-        print(&quot;Cron Created...&quot;) 
-    def __call__(self, page): 
+    def __init__(self):
+        print(&quot;Cron Created...&quot;)
+    def __call__(self, page):
         print(page.url + &quot; - status: &quot; + str(page.status_code))
 
 async def main():
