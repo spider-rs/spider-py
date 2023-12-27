@@ -36,16 +36,15 @@ asyncio.run(main())
 
 Setting up real time subscriptions can be done too.
 
-
 ```python
 import asyncio
 
 from spider_rs import Website
 
 class Subscription:
-    def __init__(self): 
-        print("Subscription Created...") 
-    def __call__(self, page): 
+    def __init__(self):
+        print("Subscription Created...")
+    def __call__(self, page):
         print(page.url + " - status: " + str(page.status_code))
 
 async def main():

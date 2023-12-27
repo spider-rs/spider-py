@@ -136,6 +136,34 @@ async def main():
 asyncio.run(main())
 ```
 
+### Depth Limit
+
+Set the depth limit for the amount of forward pages.
+
+```ts
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_depth(3)
+
+asyncio.run(main())
+```
+
+### Cache
+
+Enable HTTP caching, this useful when using the spider on a server.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_caching(True)
+
+asyncio.run(main())
+```
+
 ### Delays
 
 Add delays between pages. Defaults to none.
@@ -258,15 +286,14 @@ asyncio.run(main())
 
 To stop a crawl you can use `website.stopCrawl(id)`, pass in the crawl id to stop a run or leave empty for all crawls to stop.
 
-
 ```py
 import asyncio
 from spider_rs import Website
 
 class Subscription:
-    def __init__(self): 
-        print("Subscription Created...") 
-    def __call__(self, page): 
+    def __init__(self):
+        print("Subscription Created...")
+    def __call__(self, page):
         print(page.url + " - status: " + str(page.status_code))
 
 async def main():

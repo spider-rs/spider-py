@@ -1,6 +1,6 @@
 # Page
 
-A single page on a website, useful if you just the root url.
+A single page on a website, useful if you need just the root url.
 
 ## New Page
 

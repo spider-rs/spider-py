@@ -34,9 +34,22 @@ impl Page {
 
   /// get the page content
   pub fn fetch(mut slf: PyRefMut<'_, Self>) -> PyRefMut<'_, Self> {
+    use spider::{
+      lazy_static::lazy_static, reqwest::Client, reqwest_middleware::ClientWithMiddleware,
+      ClientBuilder,
+    };
+    lazy_static! {
+      /// top level single page client to re-use.
+      pub static ref PAGE_CLIENT: ClientWithMiddleware = {
+        let reqwest_client = Client::builder().build().unwrap_or_default();
+        let client = ClientBuilder::new(reqwest_client).build();
+
+        client
+      };
+    }
     let s = pyo3_asyncio::tokio::get_runtime()
       .block_on(async move {
-        let page = spider::page::Page::new_page(&slf.url, &Default::default()).await;
+        let page = spider::page::Page::new_page(&slf.url, &PAGE_CLIENT).await;
         slf.status_code = page.status_code.into();
         slf.inner = Some(page);
         slf.selectors = spider::page::get_page_selectors(

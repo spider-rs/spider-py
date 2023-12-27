@@ -746,9 +746,15 @@ impl Website {
     slf
   }
 
-  /// Set a crawl depth limit. If the value is 0 there is no limit. This does nothing without the feat flag [budget] enabled.
+  /// Set a crawl depth limit. If the value is 0 there is no limit.
   pub fn with_depth(mut slf: PyRefMut<'_, Self>, depth: usize) -> PyRefMut<'_, Self> {
     slf.inner.with_depth(depth);
+    slf
+  }
+
+  /// Cache the page following HTTP rules.
+  pub fn with_caching(mut slf: PyRefMut<'_, Self>, cache: bool) -> PyRefMut<'_, Self> {
+    slf.inner.with_caching(cache);
     slf
   }
 

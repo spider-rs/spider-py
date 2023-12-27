@@ -15,4 +15,6 @@
 
 # Usage
 
+- [Crawl](./crawl.md)
+- [Scrape](./scrape.md)
 - [Cron Job](./cron-job.md)

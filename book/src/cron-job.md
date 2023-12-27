@@ -7,9 +7,9 @@ import asyncio
 from spider_rs import Website
 
 class Subscription:
-    def __init__(self): 
-        print("Cron Created...") 
-    def __call__(self, page): 
+    def __init__(self):
+        print("Cron Created...")
+    def __call__(self, page):
         print(page.url + " - status: " + str(page.status_code))
 
 async def main():
