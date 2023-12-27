@@ -277,6 +277,26 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
+<h3 id="depth-limit"><a class="header" href="#depth-limit">Depth Limit</a></h3>
+<p>Set the depth limit for the amount of forward pages.</p>
+<pre><code class="language-ts">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_depth(3)
+
+asyncio.run(main())
+</code></pre>
+<h3 id="cache"><a class="header" href="#cache">Cache</a></h3>
+<p>Enable HTTP caching, this useful when using the spider on a server.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;).with_caching(True)
+
+asyncio.run(main())
+</code></pre>
 <h3 id="delays"><a class="header" href="#delays">Delays</a></h3>
 <p>Add delays between pages. Defaults to none.</p>
 <pre><code class="language-py">import asyncio
