@@ -272,6 +272,7 @@ class Subscription:
 async def main():
     website = Website("https://choosealicense.com")
     website.crawl(Subscription())
+    # sleep for 2s and stop etc
     website.stop()
 
 asyncio.run(main())

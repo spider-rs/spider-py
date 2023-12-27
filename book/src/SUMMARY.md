@@ -10,5 +10,9 @@
 # Configuration
 
 - [Website](./website.md)
+- [Page](./page.md)
 - [Environment](./env.md)
 
+# Usage
+
+- [Cron Job](./cron-job.md)
