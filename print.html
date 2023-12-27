@@ -405,6 +405,7 @@ class Subscription:
 async def main():
     website = Website(&quot;https://choosealicense.com&quot;)
     website.crawl(Subscription())
+    # sleep for 2s and stop etc
     website.stop()
 
 asyncio.run(main())
