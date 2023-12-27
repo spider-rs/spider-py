@@ -180,12 +180,28 @@
                 <div id="content" class="content">
                     <main>
                         <h1 id="simple-example"><a class="header" href="#simple-example">Simple Example</a></h1>
+<p>We use the <a href="https://pyo3.rs/v0.20.0/">pyo3</a> to port the Rust project to target Python.</p>
+<p>There are some performance drawbacks from the addon, even still the crawls are lightning fast and efficient.</p>
 <pre><code class="language-python">import asyncio
+
+from spider_rs import Website
+
+async def main():
+    website = Website(&quot;https://jeffmendez.com&quot;)
+    website.crawl()
+    print(website.links)
+    # print(website.pages)
+
+asyncio.run(main())
+</code></pre>
+<h2 id="shortcut"><a class="header" href="#shortcut">Shortcut</a></h2>
+<p>You can use the <code>crawl</code> shortcut method to collect contents quickly without configuration.</p>
+<pre><code class="language-ts">import asyncio
 
 from spider_rs import crawl
 
 async def main():
-    website = await crawl(&quot;https://jeffmendez.com&quot;)
+    website = crawl(&quot;https://jeffmendez.com&quot;)
     print(website.links)
     # print(website.pages)
 
