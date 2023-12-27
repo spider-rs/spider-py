@@ -1,12 +1,16 @@
-import time, scrapy
+import time, scrapy, sys
 from scrapy.linkextractors import LinkExtractor
 from scrapy.spiders import CrawlSpider, Rule
 from scrapy.crawler import CrawlerProcess
+from urllib.parse import urlparse
+
+url = len(sys.argv) > 1 and str(sys.argv[1]) or "https://rsseau.fr"
+host = urlparse(url).hostname
 
 class MySpider(CrawlSpider):
-    name = 'rsseau.fr'
-    allowed_domains = ['rsseau.fr']
-    start_urls = ['https://rsseau.fr']
+    name = host
+    allowed_domains = [host]
+    start_urls = [url]
     links = []
     rules = (
         Rule(LinkExtractor(), callback='parse_item', follow=True),
@@ -27,5 +31,4 @@ start = time.time()
 process.crawl(spider)
 process.start()
 end = time.time()
-print("pages found " + str(len(spider.links)))
-print("elasped duration " + str(end - start))
+print(url, "pages found " + str(len(spider.links)), "elasped duration " + str(end - start) + "s", sep="\n")

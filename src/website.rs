@@ -7,7 +7,7 @@ use spider::tokio::task::JoinHandle;
 use spider::utils::shutdown;
 use std::time::Duration;
 
-/// a website holding the inner spider::website::Website from Rust fit for python.
+/// A website holding the inner spider::website::Website from Rust fit for python.
 #[pyclass]
 pub struct Website {
   /// the website from spider.
@@ -18,15 +18,8 @@ pub struct Website {
   crawl_handles: IndexMap<u32, JoinHandle<()>>,
   /// do not convert content to UT8.
   raw_content: bool,
-  /// the data collected.
-  collected_data: Box<Vec<u8>>,
   /// is the crawl running in the background.
   running_in_background: bool, // /// the file handle for storing data
-                               // file_handle: Option<spider::tokio::fs::File>,
-}
-
-struct PageEvent {
-  pub page: NPage,
 }
 
 #[pymethods]
@@ -39,7 +32,6 @@ impl Website {
       subscription_handles: IndexMap::new(),
       crawl_handles: IndexMap::new(),
       raw_content: raw_content.unwrap_or_default(),
-      collected_data: Box::new(Vec::new()),
       running_in_background: false, // file_handle: None,
     }
   }
@@ -48,49 +40,6 @@ impl Website {
   pub fn status(&self) -> String {
     self.inner.get_status().to_string()
   }
-
-  // /// store data to memory for disk storing. This will create the path if not exist and defaults to ./storage.
-  // pub async fn export_jsonl_data(&self, export_path: Option<String>) -> std::io::Result<()> {
-  //   use spider::tokio::io::AsyncWriteExt;
-  //   let file = match export_path {
-  //     Some(p) => {
-  //       let base_dir = p
-  //         .split("/")
-  //         .into_iter()
-  //         .map(|f| {
-  //           if f.contains(".") {
-  //             "".to_string()
-  //           } else {
-  //             f.to_string()
-  //           }
-  //         })
-  //         .collect::<String>();
-
-  //       spider::tokio::fs::create_dir_all(&base_dir).await?;
-
-  //       if !p.contains(".") {
-  //         p + ".jsonl"
-  //       } else {
-  //         p
-  //       }
-  //     }
-  //     _ => {
-  //       spider::tokio::fs::create_dir_all("./storage").await?;
-  //       "./storage/".to_owned()
-  //         + &self
-  //           .inner
-  //           .get_domain()
-  //           .inner()
-  //           .replace("http://", "")
-  //           .replace("https://", "")
-  //         + "jsonl"
-  //     }
-  //   };
-  //   let mut file = spider::tokio::fs::File::create(file).await?;
-  //   // transform data step needed to auto convert type ..
-  //   file.write_all(&self.collected_data).await?;
-  //   Ok(())
-  // }
 
   /// subscribe and add an event listener.
   pub fn subscribe(mut slf: PyRefMut<'_, Self>, on_page_event: PyObject) -> u32 {

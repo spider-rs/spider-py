@@ -1,5 +1,16 @@
 # Benchmarks
 
+Test url: `https://espn.com`
+Mac M1 64gb 10-core CPU
+
+| `libraries`                  | `pages`   | `speed` |
+| :--------------------------- | :-------- | :------ |
+| **`spider(rust): crawl`**    | `150,387` | `1m`    |
+| **`spider(nodejs): crawl`**  | `150,387` | `153s`  |
+| **`spider(python): crawl`**  | `150,387` | `186s`  |
+| **`scrapy(python): crawl`**  | `49,598`  | `1h`    |
+| **`crawlee(nodejs): crawl`** | `18,779`  | `30m`   |
+
 View the latest runs on [github](https://github.com/spider-rs/spider-py/actions/workflows/bench.yml).
 
 ```sh
