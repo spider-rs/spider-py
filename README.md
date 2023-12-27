@@ -55,6 +55,8 @@ async def main():
 asyncio.run(main())
 ```
 
+View the [examples](./examples/) for more.
+
 ## Development
 
 Install maturin `pipx install maturin` and python.
@@ -63,12 +65,7 @@ Install maturin `pipx install maturin` and python.
 
 ## Benchmarks
 
-View [bench](./bench/) to see the results. The library should run faster than scrappy by at least 2x for normal workflows and up to 100,000x for large websites.
-The speed increases drastically as we harness isolated concurrency from Rust.
-
-## TODO
-
-1. Fix stop concurrent crawl.
+View [bench](./bench/) to see the results.
 
 ## Issues
 

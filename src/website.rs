@@ -1,7 +1,7 @@
 use crate::{new_page, NPage, BUFFER};
-use spider::compact_str::CompactString;
 use indexmap::IndexMap;
 use pyo3::prelude::*;
+use spider::compact_str::CompactString;
 use spider::tokio::select;
 use spider::tokio::task::JoinHandle;
 use spider::utils::shutdown;
@@ -746,6 +746,12 @@ impl Website {
     slf
   }
 
+  /// Set a crawl depth limit. If the value is 0 there is no limit. This does nothing without the feat flag [budget] enabled.
+  pub fn with_depth(mut slf: PyRefMut<'_, Self>, depth: usize) -> PyRefMut<'_, Self> {
+    slf.inner.with_depth(depth);
+    slf
+  }
+
   /// add external domains
   pub fn with_external_domains(
     mut slf: PyRefMut<'_, Self>,
@@ -849,6 +855,12 @@ impl Website {
     proxies: Option<Vec<String>>,
   ) -> PyRefMut<'_, Self> {
     slf.inner.configuration.with_proxies(proxies);
+    slf
+  }
+
+  /// Use stealth mode for the request. This does nothing without the [chrome] flag enabled.
+  pub fn with_stealth(mut slf: PyRefMut<'_, Self>, stealth_mode: bool) -> PyRefMut<'_, Self> {
+    slf.inner.configuration.with_stealth(stealth_mode);
     slf
   }
 

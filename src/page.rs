@@ -1,5 +1,5 @@
-use spider::compact_str::CompactString;
 use pyo3::{pyclass, pymethods, PyRef, PyRefMut};
+use spider::compact_str::CompactString;
 
 /// a simple page object
 #[derive(Default)]
