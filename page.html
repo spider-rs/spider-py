@@ -3,8 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>spider-py</title>
-        <meta name="robots" content="noindex">
+        <title>Page - spider-py</title>
 
 
         <!-- Custom HTML head -->
@@ -89,7 +88,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="page.html"><strong aria-hidden="true">4.</strong> Page</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">5.</strong> Environment</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="page.html" class="active"><strong aria-hidden="true">4.</strong> Page</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">5.</strong> Environment</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -151,6 +150,9 @@
                         <a href="https://github.com/spider-rs/spider-py/tree/main/book" title="Git repository" aria-label="Git repository">
                             <i id="git-repository-button" class="fa fa-github"></i>
                         </a>
+                        <a href="https://github.com/spider-rs/spider-py/edit/main/book/src/page.md" title="Suggest an edit" aria-label="Suggest an edit">
+                            <i id="git-edit-button" class="fa fa-edit"></i>
+                        </a>
 
                     </div>
                 </div>
@@ -177,239 +179,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
-<p><code>Spider-Py</code> is the fastest web crawler and indexer written in Rust ported to Python.</p>
-<ul>
-<li>Concurrent</li>
-<li>Streaming</li>
-<li>Decentralization</li>
-<li>Headless Chrome <a href="https://github.com/mattsse/chromiumoxide">Rendering</a></li>
-<li>HTTP Proxies</li>
-<li>Cron Jobs</li>
-<li>Subscriptions</li>
-<li>Blacklisting and Budgeting Depth</li>
-<li>Written in <a href="https://www.rust-lang.org/">Rust</a> for speed, safety, and simplicity</li>
-</ul>
-<p>Spider powers some big tools and helps bring the crawling aspect to almost no downtime with the correct setup, view the <a href="https://github.com/spider-rs/spider">spider</a> project to learn more.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="getting-started"><a class="header" href="#getting-started">Getting Started</a></h1>
-<p>Make sure to have python installed.</p>
-<pre><code class="language-sh">pip install spider_rs
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="simple-example"><a class="header" href="#simple-example">Simple Example</a></h1>
-<pre><code class="language-python">import asyncio
-
-from spider_rs import crawl
-
-async def main():
-    website = await crawl(&quot;https://jeffmendez.com&quot;)
-    print(website.links)
-    # print(website.pages)
-
-asyncio.run(main())
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="website"><a class="header" href="#website">Website</a></h1>
-<p>The Website class is the foundations to the spider.</p>
-<h2 id="builder-pattern"><a class="header" href="#builder-pattern">Builder pattern</a></h2>
-<p>We use the builder pattern to configure the website for crawling.</p>
-<p>*note: Replace <code>https://choosealicense.com</code> from the examples below with your website target URL.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
-    website.crawl()
-    print(website.get_links())
-
-asyncio.run(main())
-</code></pre>
-<h3 id="custom-headers"><a class="header" href="#custom-headers">Custom Headers</a></h3>
-<p>Add custom HTTP headers to use when crawling/scraping.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_headers({ &quot;authorization&quot;: &quot;mytoken&quot;})
-
-asyncio.run(main())
-</code></pre>
-<h3 id="blacklist"><a class="header" href="#blacklist">Blacklist</a></h3>
-<p>Prevent crawling a set path, url, or pattern with Regex.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_blacklist_url([&quot;/blog&quot;, &quot;/resume&quot;])
-
-asyncio.run(main())
-</code></pre>
-<h3 id="crons"><a class="header" href="#crons">Crons</a></h3>
-<p>Setup a cron job that can run at any time in the background using cron-syntax.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_cron(&quot;1/5 * * * * *&quot;)
-
-asyncio.run(main())
-</code></pre>
-<p>View the <a href="./cron-job.html">cron</a> section for details how to use the cron.</p>
-<h3 id="budget"><a class="header" href="#budget">Budget</a></h3>
-<p>Add a crawl budget that prevents crawling <code>x</code> amount of pages.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_budget({
-    &quot;*&quot;: 1,
-  })
-
-asyncio.run(main())
-</code></pre>
-<h3 id="subdomains"><a class="header" href="#subdomains">Subdomains</a></h3>
-<p>Include subdomains in request.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_subdomains(True)
-
-asyncio.run(main())
-</code></pre>
-<h3 id="tld"><a class="header" href="#tld">TLD</a></h3>
-<p>Include TLDs in request.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_tlds(True)
-
-asyncio.run(main())
-</code></pre>
-<h3 id="external-domains"><a class="header" href="#external-domains">External Domains</a></h3>
-<p>Add external domains to include with the website.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_external_domains([&quot;https://www.myotherdomain.com&quot;])
-
-asyncio.run(main())
-</code></pre>
-<h3 id="proxy"><a class="header" href="#proxy">Proxy</a></h3>
-<p>Use a proxy to crawl a website.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_proxies([&quot;https://www.myproxy.com&quot;])
-
-asyncio.run(main())
-</code></pre>
-<h3 id="delays"><a class="header" href="#delays">Delays</a></h3>
-<p>Add delays between pages. Defaults to none.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_delays(200)
-
-asyncio.run(main())
-</code></pre>
-<h3 id="user-agent"><a class="header" href="#user-agent">User-Agent</a></h3>
-<p>Use a custom User-Agent.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_user_agent(&quot;mybot/v1&quot;)
-
-asyncio.run(main())
-</code></pre>
-<h3 id="request-timeout"><a class="header" href="#request-timeout">Request Timeout</a></h3>
-<p>Add a request timeout per page in miliseconds. Example shows 30 seconds.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_request_timeout(30000)
-
-asyncio.run(main())
-</code></pre>
-<h3 id="respect-robots"><a class="header" href="#respect-robots">Respect Robots</a></h3>
-<p>Respect the robots.txt file.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_respect_robots_txt(True)
-
-asyncio.run(main())
-</code></pre>
-<h3 id="http2-prior-knowledge"><a class="header" href="#http2-prior-knowledge">Http2 Prior Knowledge</a></h3>
-<p>Use http2 to connect if you know the website servers supports this.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_http2_prior_knowledge(True)
-
-asyncio.run(main())
-</code></pre>
-<h2 id="chaining"><a class="header" href="#chaining">Chaining</a></h2>
-<p>You can chain all of the configs together for simple configuration.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_subdomains(true).with_tlds(true).with_user_agent(&quot;mybot/v1&quot;).with_respect_robots_txt(true)
-
-asyncio.run(main())
-</code></pre>
-<h2 id="raw-content"><a class="header" href="#raw-content">Raw Content</a></h2>
-<p>Set the second param of the website constructor to <code>true</code> to return content without UTF-8.
-This will return <code>rawContent</code> and leave <code>content</code> when using subscriptions or the Page Object.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;, True)
-    website.scrape()
-
-asyncio.run(main())
-</code></pre>
-<h2 id="clearing-crawl-data"><a class="header" href="#clearing-crawl-data">Clearing Crawl Data</a></h2>
-<p>Use <code>website.clear</code> to remove the links visited and page data or <code>website.drain_links</code> to drain the links visited.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
-    website.crawl()
-    print(website.getLinks())
-    website.clear()
-    print(website.getLinks())
-
-asyncio.run(main())
-</code></pre>
-<h2 id="stop-crawl"><a class="header" href="#stop-crawl">Stop crawl</a></h2>
-<p>To stop a crawl you can use <code>website.stopCrawl(id)</code>, pass in the crawl id to stop a run or leave empty for all crawls to stop.</p>
-<pre><code class="language-py">import asyncio
-from spider_rs import Website
-
-class Subscription:
-    def __init__(self): 
-        print(&quot;Subscription Created...&quot;) 
-    def __call__(self, page): 
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
-
-async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
-    website.crawl(Subscription())
-    website.stop()
-
-asyncio.run(main())
-</code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="page"><a class="header" href="#page">Page</a></h1>
+                        <h1 id="page"><a class="header" href="#page">Page</a></h1>
 <p>A single page on a website, useful if you just the root url.</p>
 <h2 id="new-page"><a class="header" href="#new-page">New Page</a></h2>
 <p>Get a new page with content.</p>
@@ -462,18 +232,18 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="environment"><a class="header" href="#environment">Environment</a></h1>
-<p>Env variables to adjust the project.</p>
-<h2 id="chrome_url"><a class="header" href="#chrome_url">CHROME_URL</a></h2>
-<p>You can set the chrome URL to connect remotely.</p>
-<pre><code class="language-sh">CHROME_URL=http://localhost:9222
-</code></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="website.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
 
+                            <a rel="next prefetch" href="env.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
 
                         <div style="clear: both"></div>
                     </nav>
@@ -481,7 +251,13 @@ asyncio.run(main())
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="website.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
 
+                    <a rel="next prefetch" href="env.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
             </nav>
 
         </div>
@@ -504,11 +280,6 @@ asyncio.run(main())
 
         <!-- Custom JS scripts -->
 
-        <script>
-        window.addEventListener('load', function() {
-            window.setTimeout(window.print, 100);
-        });
-        </script>
 
     </div>
     </body>
