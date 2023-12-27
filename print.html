@@ -482,7 +482,7 @@ class Subscription:
 
 async def main():
     website = Website(&quot;https://choosealicense.com&quot;).with_cron(&quot;1/5 * * * * *&quot;).build()
-    handle = await website.run_cron(Subscription);
+    handle = await website.run_cron(Subscription());
 
 asyncio.run(main())
 </code></pre>
