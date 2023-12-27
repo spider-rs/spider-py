@@ -3,7 +3,7 @@
 You can run the benches with python in terminal.
 
 ```sh
-python scrapy.py && python spider.py
+python scrappy.py && python spider.py
 ```
 
 ## Cases
@@ -32,4 +32,22 @@ pages found 200
 elasped duration 5.860108852386475
 ```
 
-Linux performance for Spider-RS increases around 10x especially on Arm.
+Test url: `https://a11ywatch.com` (medium)
+648 pages
+
+| `libraries`                       | `speed` |
+| :-------------------------------- | :------ |
+| **`spider-rs: crawl 10 samples`** | `2s`    |
+| **`scrapy: crawl 10 samples`**    | `7.7s`  |
+
+Test url: `https://espn.com` (large)
+150,387 pages
+
+| `libraries`                               | `pages`   | `speed` |
+| :---------------------------------------- | :-------- | :------ |
+| **`spider-rs(python): crawl 10 samples`** | `150,387` | `186s`  |
+| **`scrapy(python): crawl 10 samples`**    | `49,598`  | `1h`    |
+
+Scrapy used too much memory, crawl cancelled after an hour.
+
+Note: The performance scales the larger the website and if throttling is needed. Linux benchmarks are about 10x faster than macOS for spider-rs.

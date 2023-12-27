@@ -2,24 +2,19 @@
 
 The [spider](https://github.com/spider-rs/spider) project ported to Python.
 
+Test url: `https://espn.com`
+
+| `libraries`                    | `pages`   | `speed` |
+| :----------------------------- | :-------- | :------ |
+| **`spider-rs(python): crawl`** | `150,387` | `186s`  |
+| **`scrapy(python): crawl`**    | `49,598`  | `1h`    |
+
+The benches above were ran on a mac m1, spider on linux arm machines performs about 2-10x faster.
+
 ## Getting Started
 
 1. `pip install spider_rs`
 
-```python
-import asyncio
-
-from spider_rs import crawl
-
-async def main():
-    website = await crawl("https://choosealicense.com")
-    print(website.links)
-    # print(website.pages)
-
-asyncio.run(main())
-```
-
-Use the Website class to build the crawler you need.
 
 ```python
 import asyncio
@@ -27,34 +22,14 @@ import asyncio
 from spider_rs import Website
 
 async def main():
-    website = Website("https://choosealicense.com", False).with_headers({ "authorization": "myjwttoken" })
+    website = Website("https://choosealicense.com")
     website.crawl()
     print(website.get_links())
 
 asyncio.run(main())
 ```
 
-Setting up real time subscriptions can be done too.
-
-```python
-import asyncio
-
-from spider_rs import Website
-
-class Subscription:
-    def __init__(self):
-        print("Subscription Created...")
-    def __call__(self, page):
-        print(page.url + " - status: " + str(page.status_code))
-
-async def main():
-    website = Website("https://choosealicense.com", False)
-    website.crawl(Subscription())
-
-asyncio.run(main())
-```
-
-View the [examples](./examples/) for more.
+View the [examples](./examples/) to learn more.
 
 ## Development
 

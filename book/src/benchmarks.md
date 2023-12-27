@@ -50,4 +50,22 @@ Test url: `https://rsseau.fr` (medium)
 | **`spider-rs: crawl 10 samples`** | `2.5s`  |
 | **`scrapy: crawl 10 samples`**    | `10s`   |
 
-The performance scales the larger the website and if throttling is needed. Linux benchmarks are about 10x faster than macOS for spider-rs.
+Test url: `https://a11ywatch.com` (medium)
+648 pages
+
+| `libraries`                       | `speed` |
+| :-------------------------------- | :------ |
+| **`spider-rs: crawl 10 samples`** | `2s`    |
+| **`scrapy: crawl 10 samples`**    | `7.7s`  |
+
+Test url: `https://espn.com` (large)
+150,387 pages
+
+| `libraries`                       | `pages`   | `speed` |
+| :-------------------------------- | :-------- | :------ |
+| **`spider-rs: crawl 10 samples`** | `150,387` | `186s`  |
+| **`scrapy: crawl 10 samples`**    | `49,598`  | `1h`    |
+
+Scrapy used too much memory, crawl cancelled after an hour.
+
+Note: The performance scales the larger the website and if throttling is needed. Linux benchmarks are about 10x faster than macOS for spider-rs.
