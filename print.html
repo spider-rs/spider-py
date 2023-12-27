@@ -89,7 +89,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="page.html"><strong aria-hidden="true">4.</strong> Page</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">5.</strong> Environment</a></li><li class="chapter-item expanded affix "><li class="part-title">Usage</li><li class="chapter-item expanded "><a href="crawl.html"><strong aria-hidden="true">6.</strong> Crawl</a></li><li class="chapter-item expanded "><a href="scrape.html"><strong aria-hidden="true">7.</strong> Scrape</a></li><li class="chapter-item expanded "><a href="cron-job.html"><strong aria-hidden="true">8.</strong> Cron Job</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded affix "><a href="index.html">Introduction</a></li><li class="chapter-item expanded affix "><li class="part-title">User Guide</li><li class="chapter-item expanded "><a href="getting-started.html"><strong aria-hidden="true">1.</strong> Getting started</a></li><li class="chapter-item expanded "><a href="simple.html"><strong aria-hidden="true">2.</strong> A simple example</a></li><li class="chapter-item expanded affix "><li class="part-title">Configuration</li><li class="chapter-item expanded "><a href="website.html"><strong aria-hidden="true">3.</strong> Website</a></li><li class="chapter-item expanded "><a href="page.html"><strong aria-hidden="true">4.</strong> Page</a></li><li class="chapter-item expanded "><a href="env.html"><strong aria-hidden="true">5.</strong> Environment</a></li><li class="chapter-item expanded affix "><li class="part-title">Usage</li><li class="chapter-item expanded "><a href="crawl.html"><strong aria-hidden="true">6.</strong> Crawl</a></li><li class="chapter-item expanded "><a href="scrape.html"><strong aria-hidden="true">7.</strong> Scrape</a></li><li class="chapter-item expanded "><a href="cron-job.html"><strong aria-hidden="true">8.</strong> Cron Job</a></li><li class="chapter-item expanded "><a href="storing-data.html"><strong aria-hidden="true">9.</strong> Storing Data</a></li><li class="chapter-item expanded affix "><li class="part-title">Benchmarks</li><li class="chapter-item expanded "><a href="benchmarks.html"><strong aria-hidden="true">10.</strong> Compare</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle">
                 <div class="sidebar-resize-indicator"></div>
@@ -671,6 +671,66 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="storing-data"><a class="header" href="#storing-data">Storing Data</a></h1>
+<p>Storing data can be done to collect the raw content for a website.</p>
+<p>This allows you to upload and download the content without UTF-8 conversion. The property only appears when
+setting the second param of the <code>Website</code> class constructor to true.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+class Subscription:
+    def __init__(self):
+        print(&quot;Subscription Created...&quot;)
+    def __call__(self, page):
+        print(page.url + &quot; - bytes: &quot; + str(page.raw_content))
+        # do something with page.raw_content
+
+async def main():
+    website = Website(&quot;https://choosealicense.com&quot;)
+    website.crawl(Subscription(), True)
+</code></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="benchmarks"><a class="header" href="#benchmarks">Benchmarks</a></h1>
+<p>View the latest runs on <a href="https://github.com/spider-rs/spider-py/actions/workflows/bench.yml">github</a>.</p>
+<pre><code class="language-sh">Linux
+8-core CPU
+32 GB of RAM memory
+-----------------------
+</code></pre>
+<p>Test url: <code>https://choosealicense.com</code> (small)
+32 pages</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"><code>libraries</code></th><th style="text-align: left"><code>speed</code></th></tr></thead><tbody>
+<tr><td style="text-align: left"><strong><code>spider-rs: crawl 10 samples</code></strong></td><td style="text-align: left"><code>76ms</code></td></tr>
+<tr><td style="text-align: left"><strong><code>scrapy: crawl 10 samples</code></strong></td><td style="text-align: left"><code>1s</code></td></tr>
+</tbody></table>
+</div>
+<p>Test url: <code>https://rsseau.fr</code> (medium)
+211 pages</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"><code>libraries</code></th><th style="text-align: left"><code>speed</code></th></tr></thead><tbody>
+<tr><td style="text-align: left"><strong><code>spider-rs: crawl 10 samples</code></strong></td><td style="text-align: left"><code>0.5s</code></td></tr>
+<tr><td style="text-align: left"><strong><code>scrapy: crawl 10 samples</code></strong></td><td style="text-align: left"><code>72s</code></td></tr>
+</tbody></table>
+</div>
+<pre><code class="language-sh">----------------------
+mac Apple M1 Max
+10-core CPU
+64 GB of RAM memory
+-----------------------
+</code></pre>
+<p>Test url: <code>https://choosealicense.com</code> (small)
+32 pages</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"><code>libraries</code></th><th style="text-align: left"><code>speed</code></th></tr></thead><tbody>
+<tr><td style="text-align: left"><strong><code>spider-rs: crawl 10 samples</code></strong></td><td style="text-align: left"><code>286ms</code></td></tr>
+<tr><td style="text-align: left"><strong><code>scrapy: crawl 10 samples</code></strong></td><td style="text-align: left"><code>1.7s</code></td></tr>
+</tbody></table>
+</div>
+<p>Test url: <code>https://rsseau.fr</code> (medium)
+211 pages</p>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: left"><code>libraries</code></th><th style="text-align: left"><code>speed</code></th></tr></thead><tbody>
+<tr><td style="text-align: left"><strong><code>spider-rs: crawl 10 samples</code></strong></td><td style="text-align: left"><code>2.5s</code></td></tr>
+<tr><td style="text-align: left"><strong><code>scrapy: crawl 10 samples</code></strong></td><td style="text-align: left"><code>75s</code></td></tr>
+</tbody></table>
+</div>
+<p>The performance scales the larger the website and if throttling is needed. Linux benchmarks are about 10x faster than macOS for spider-rs.</p>
 
                     </main>
 
