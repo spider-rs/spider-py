@@ -204,3 +204,4 @@ __test__/*.js
 /bench/*.js
 /bench/case/**.js
 /bench/storage/
+/bench/__pycache__

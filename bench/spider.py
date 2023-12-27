@@ -5,7 +5,7 @@ from spider_rs import Website
 
 async def main():
     print("benching spider-rs(python)...")
-    website = Website("https://rsseau.fr", False)
+    website = Website("https://rsseau.fr")
     start = time.time()
     website.crawl()
     end = time.time()

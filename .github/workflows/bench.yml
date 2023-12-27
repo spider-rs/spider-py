@@ -1,0 +1,35 @@
+name: Bench Compare
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  checkout_and_test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["pypy3.9", "pypy3.10", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+      - name: Checkout code from ${{ github.repository }}
+        uses: actions/checkout@v4
+
+      - name: Setup python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+
+      - name: Install Deps
+        run: pip install scrapy && pip install spider_rs
+
+      - name: Run Bench @spider-rs/spider-rs
+        run: python ./bench/spider.py
+
+      - name: Run Bench Scrapy
+        run: python ./bench/scrappy.py

@@ -18,3 +18,8 @@
 - [Crawl](./crawl.md)
 - [Scrape](./scrape.md)
 - [Cron Job](./cron-job.md)
+- [Storing Data](./storing-data.md)
+
+# Benchmarks
+
+- [Compare](./benchmarks.md)

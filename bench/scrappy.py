@@ -1,7 +1,6 @@
-import time
-import scrapy
-from scrapy.spiders import CrawlSpider, Rule
+import time, scrapy
 from scrapy.linkextractors import LinkExtractor
+from scrapy.spiders import CrawlSpider, Rule
 from scrapy.crawler import CrawlerProcess
 
 class MySpider(CrawlSpider):
@@ -23,8 +22,8 @@ class MySpider(CrawlSpider):
 
 print("benching scrappy(python)...")
 process = CrawlerProcess()
-start = time.time()
 spider = MySpider
+start = time.time()
 process.crawl(spider)
 process.start()
 end = time.time()

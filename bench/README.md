@@ -3,7 +3,7 @@
 You can run the benches with python in terminal.
 
 ```sh
-python scrappy.py && python spider.py
+python scrapy.py && python spider.py
 ```
 
 ## Cases
@@ -16,15 +16,15 @@ mac Apple M1 Max
 
 URL used `https://rsseau.fr`
 
-[Scrapy](scrappy.py)
+[Scrapy](scrapy.py)
 
 ```
-Scrappy
+Scrapy
 pages found 188
 elasped duration 9.301506042480469
 ```
 
-[Spider-Rs](spider.py)
+[Spider-RS](spider.py)
 
 ```
 Spider
