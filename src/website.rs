@@ -2,6 +2,7 @@ use crate::{new_page, NPage, BUFFER};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
 use spider::compact_str::CompactString;
+use spider::configuration::WaitForIdleNetwork;
 use spider::tokio::select;
 use spider::tokio::task::JoinHandle;
 use spider::utils::shutdown;
@@ -778,6 +779,27 @@ impl Website {
     slf
       .inner
       .with_chrome_intercept(chrome_intercept, block_images);
+    slf
+  }
+
+  /// Wait for idle network request. This method does nothing if the `chrome` feature is not enabled.
+  /// Set the timeout to 0 to disable the timeout.
+  pub fn with_wait_for_idle_network(
+    mut slf: PyRefMut<'_, Self>,
+    wait_for_idle_network: bool,
+    timeout: u64,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .with_wait_for_idle_network(if wait_for_idle_network {
+        Some(WaitForIdleNetwork::new(if timeout == 0 {
+          None
+        } else {
+          Some(core::time::Duration::from_millis(timeout))
+        }))
+      } else {
+        None
+      });
     slf
   }
 

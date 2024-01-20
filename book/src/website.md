@@ -206,6 +206,22 @@ async def main():
 asyncio.run(main())
 ```
 
+
+### Wait For Idle Network
+
+You can wait for the Network to become idle when using chrome. This helps load all the data from client side scripts.
+The first param is whether to enable or not and the second is the duration max timeout in milliseconds.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_wait_for_idle_network(True, 12000)
+
+asyncio.run(main())
+```
+
 ### Respect Robots
 
 Respect the robots.txt file.
