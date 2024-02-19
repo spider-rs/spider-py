@@ -188,13 +188,13 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - bytes: &quot; + str(page.raw_content))
+        print(page.url + " - bytes: " + str(page.raw_content))
         # do something with page.raw_content
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription(), True)
 </code></pre>
 

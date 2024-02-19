@@ -190,7 +190,7 @@
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://jeffmendez.com&quot;)
+    website = Website("https://jeffmendez.com")
     website.crawl()
     print(website.links)
     # print(website.pages)
@@ -204,12 +204,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription())
 
 asyncio.run(main())
@@ -221,12 +221,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - title: &quot; + str(page.title()))
+        print(page.url + " - title: " + str(page.title()))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription())
 </code></pre>
 <h2 id="shortcut"><a class="header" href="#shortcut">Shortcut</a></h2>
@@ -236,7 +236,7 @@ async def main():
 from spider_rs import crawl
 
 async def main():
-    website = crawl(&quot;https://jeffmendez.com&quot;)
+    website = crawl("https://jeffmendez.com")
     print(website.links)
     # print(website.pages)
 

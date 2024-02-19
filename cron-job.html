@@ -186,12 +186,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Cron Created...&quot;)
+        print("Cron Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_cron(&quot;1/5 * * * * *&quot;).build()
+    website = Website("https://choosealicense.com").with_cron("1/5 * * * * *").build()
     handle = await website.run_cron(Subscription());
 
 asyncio.run(main())

@@ -189,7 +189,7 @@
 from spider_rs import Page
 
 async def main():
-    page = Page(&quot;https://choosealicense.com&quot;)
+    page = Page("https://choosealicense.com")
     page.fetch()
 
 asyncio.run(main())
@@ -200,7 +200,7 @@ asyncio.run(main())
 from spider_rs import Page
 
 async def main():
-    page = Page(&quot;https://choosealicense.com&quot;)
+    page = Page("https://choosealicense.com")
     page.fetch()
     links = page.get_links()
     print(links)
@@ -212,7 +212,7 @@ asyncio.run(main())
 from spider_rs import Page
 
 async def main():
-    page = Page(&quot;https://choosealicense.com&quot;)
+    page = Page("https://choosealicense.com")
     page.fetch()
     links = page.get_html()
     print(links)
@@ -225,7 +225,7 @@ asyncio.run(main())
 from spider_rs import Page
 
 async def main():
-    page = Page(&quot;https://choosealicense.com&quot;)
+    page = Page("https://choosealicense.com")
     page.fetch()
     links = page.get_bytes()
     print(links)

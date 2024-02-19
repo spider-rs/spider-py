@@ -185,10 +185,10 @@
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.scrape()
     print(website.get_pages())
-    # [ { url: &quot;https://rsseau.fr/blog&quot;, html: &quot;&lt;html&gt;...&lt;/html&gt;&quot;}, ...]
+    # [ { url: "https://rsseau.fr/blog", html: "&lt;html&gt;...&lt;/html&gt;"}, ...]
 
 asyncio.run(main())
 </code></pre>
@@ -200,10 +200,10 @@ drastically speed up runs.</p>
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.scrape(NULL, NULL, True)
     print(website.get_pages())
-    # [ { url: &quot;https://rsseau.fr/blog&quot;, html: &quot;&lt;html&gt;...&lt;/html&gt;&quot;}, ...]
+    # [ { url: "https://rsseau.fr/blog", html: "&lt;html&gt;...&lt;/html&gt;"}, ...]
 
 asyncio.run(main())
 </code></pre>

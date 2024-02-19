@@ -188,7 +188,7 @@
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl()
     print(website.get_links())
 
@@ -200,7 +200,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_headers({ &quot;authorization&quot;: &quot;mytoken&quot;})
+    website = Website("https://choosealicense.com").with_headers({ "authorization": "mytoken"})
 
 asyncio.run(main())
 </code></pre>
@@ -210,7 +210,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_blacklist_url([&quot;/blog&quot;, &quot;/resume&quot;])
+    website = Website("https://choosealicense.com").with_blacklist_url(["/blog", "/resume"])
 
 asyncio.run(main())
 </code></pre>
@@ -220,7 +220,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_cron(&quot;1/5 * * * * *&quot;)
+    website = Website("https://choosealicense.com").with_cron("1/5 * * * * *")
 
 asyncio.run(main())
 </code></pre>
@@ -231,8 +231,8 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_budget({
-    &quot;*&quot;: 1,
+    website = Website("https://choosealicense.com").with_budget({
+    "*": 1,
   })
 
 asyncio.run(main())
@@ -243,7 +243,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_subdomains(True)
+    website = Website("https://choosealicense.com").with_subdomains(True)
 
 asyncio.run(main())
 </code></pre>
@@ -253,7 +253,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_tlds(True)
+    website = Website("https://choosealicense.com").with_tlds(True)
 
 asyncio.run(main())
 </code></pre>
@@ -263,7 +263,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_external_domains([&quot;https://www.myotherdomain.com&quot;])
+    website = Website("https://choosealicense.com").with_external_domains(["https://www.myotherdomain.com"])
 
 asyncio.run(main())
 </code></pre>
@@ -273,7 +273,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_proxies([&quot;https://www.myproxy.com&quot;])
+    website = Website("https://choosealicense.com").with_proxies(["https://www.myproxy.com"])
 
 asyncio.run(main())
 </code></pre>
@@ -283,7 +283,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_depth(3)
+    website = Website("https://choosealicense.com").with_depth(3)
 
 asyncio.run(main())
 </code></pre>
@@ -293,7 +293,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_caching(True)
+    website = Website("https://choosealicense.com").with_caching(True)
 
 asyncio.run(main())
 </code></pre>
@@ -303,7 +303,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_delays(200)
+    website = Website("https://choosealicense.com").with_delays(200)
 
 asyncio.run(main())
 </code></pre>
@@ -313,7 +313,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_user_agent(&quot;mybot/v1&quot;)
+    website = Website("https://choosealicense.com").with_user_agent("mybot/v1")
 
 asyncio.run(main())
 </code></pre>
@@ -323,7 +323,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_request_timeout(30000)
+    website = Website("https://choosealicense.com").with_request_timeout(30000)
 
 asyncio.run(main())
 </code></pre>
@@ -334,7 +334,7 @@ The first param is whether to enable or not and the second is the duration max t
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_wait_for_idle_network(True, 12000)
+    website = Website("https://choosealicense.com").with_wait_for_idle_network(True, 12000)
 
 asyncio.run(main())
 </code></pre>
@@ -344,7 +344,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_respect_robots_txt(True)
+    website = Website("https://choosealicense.com").with_respect_robots_txt(True)
 
 asyncio.run(main())
 </code></pre>
@@ -354,7 +354,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_http2_prior_knowledge(True)
+    website = Website("https://choosealicense.com").with_http2_prior_knowledge(True)
 
 asyncio.run(main())
 </code></pre>
@@ -364,7 +364,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;).with_subdomains(true).with_tlds(true).with_user_agent(&quot;mybot/v1&quot;).with_respect_robots_txt(true)
+    website = Website("https://choosealicense.com").with_subdomains(true).with_tlds(true).with_user_agent("mybot/v1").with_respect_robots_txt(true)
 
 asyncio.run(main())
 </code></pre>
@@ -375,7 +375,7 @@ This will return <code>rawContent</code> and leave <code>content</code> when usi
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;, True)
+    website = Website("https://choosealicense.com", True)
     website.scrape()
 
 asyncio.run(main())
@@ -386,7 +386,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl()
     print(website.getLinks())
     website.clear()
@@ -401,12 +401,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription())
     # sleep for 2s and stop etc
     website.stop()

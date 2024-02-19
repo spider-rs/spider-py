@@ -185,7 +185,7 @@
 from spider_rs import Website
 
 async def main():
-    website = Website(&quot;https://rsseau.fr&quot;)
+    website = Website("https://rsseau.fr")
     website.crawl()
     print(website.get_links())
 
@@ -198,12 +198,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription())
 
 asyncio.run(main())
@@ -215,12 +215,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription(), True)
     # this will run instantly as the crawl is in the background
 
@@ -233,12 +233,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl()
     subscription_id = website.subscribe(Subscription());
     website.crawl()
@@ -255,12 +255,12 @@ from spider_rs import Website
 
 class Subscription:
     def __init__(self):
-        print(&quot;Subscription Created...&quot;)
+        print("Subscription Created...")
     def __call__(self, page):
-        print(page.url + &quot; - status: &quot; + str(page.status_code))
+        print(page.url + " - status: " + str(page.status_code))
 
 async def main():
-    website = Website(&quot;https://choosealicense.com&quot;)
+    website = Website("https://choosealicense.com")
     website.crawl(Subscription(), false, True)
 
 asyncio.run(main())
