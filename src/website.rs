@@ -79,7 +79,7 @@ impl Website {
         match handle {
           Some(h) => {
             h.abort();
-            self.subscription_handles.remove_entry(&id);
+            self.subscription_handles.swap_remove_entry(&id);
             true
           }
           _ => false,
@@ -119,7 +119,7 @@ impl Website {
         match handle {
           Some(h) => {
             h.abort();
-            slf.crawl_handles.remove_entry(&id);
+            slf.crawl_handles.swap_remove_entry(&id);
             true
           }
           _ => false,
