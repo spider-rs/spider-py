@@ -2,8 +2,6 @@
 
 The [spider](https://github.com/spider-rs/spider) project ported to Python.
 
-The benches above were ran on a mac m1, spider on linux arm machines performs about 2-10x faster.
-
 ## Getting Started
 
 1. `pip install spider_rs`
