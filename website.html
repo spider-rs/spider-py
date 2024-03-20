@@ -348,6 +348,38 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
+<h3 id="openai"><a class="header" href="#openai">OpenAI</a></h3>
+<p>Use OpenAI to generate dynamic scripts to use with headless. Make sure to set the <code>OPENAI_API_KEY</code> env variable.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_openai({ model: "gpt-3.5-turbo", prompt: "Search for movies", maxTokens: 300 })
+
+asyncio.run(main())
+</code></pre>
+<h3 id="screenshots"><a class="header" href="#screenshots">Screenshots</a></h3>
+<p>Take a screenshot of the pages on crawl when using headless chrome.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = (
+        Website("https://choosealicense.com", False)
+        .with_screenshot({
+            "params": {
+                "cdp_params": None,
+                "full_page": True,
+                "omit_background": False
+            },
+            "bytes": False,
+            "save": True,
+            "output_dir": None
+        })
+    )
+
+asyncio.run(main())
+</code></pre>
 <h3 id="http2-prior-knowledge"><a class="header" href="#http2-prior-knowledge">Http2 Prior Knowledge</a></h3>
 <p>Use http2 to connect if you know the website servers supports this.</p>
 <pre><code class="language-py">import asyncio
