@@ -1,9 +1,9 @@
 [package]
 edition = "2021"
 name = "spider_rs"
-version = "0.0.27"
-description = "The fastest web crawler written in Rust ported to nodejs."
-repository = "https://github.com/spider-rs/spider-nodejs"
+version = "0.0.30"
+repository = "https://github.com/spider-rs/spider-py"
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib"]
@@ -11,9 +11,10 @@ crate-type = ["cdylib"]
 [dependencies]
 indexmap = "2.1.0"
 num_cpus = "1.16.0"
-spider = { version = "1.85.4", features = ["budget", "cron", "regex", "cookies", "socks", "chrome", "control", "smart", "chrome_intercept", "cache" ] }
-pyo3 = { version = "0.20.3", features = ["extension-module"] }
+spider = { version = "1.86.11", features = ["budget", "cron", "regex", "cookies", "socks", "chrome", "control", "smart", "chrome_intercept", "cache", "serde", "openai" ] }
+pyo3 = { version = "0.20.3", features = ["extension-module", "serde"] }
 pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
+serde_json = "1.0.114"
 
 [target.x86_64-unknown-linux-gnu.dependencies]
 openssl-sys = { version = "0.9.96", features = ["vendored"] }

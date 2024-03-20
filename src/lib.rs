@@ -11,11 +11,13 @@ pub mod npage;
 pub mod nwebsite;
 pub mod page;
 pub mod shortcut;
+pub mod utils;
 pub mod website;
 
 pub use npage::{new_page, page_title, NPage};
 pub use nwebsite::NWebsite;
 pub use page::Page;
+pub use utils::pydict_to_json_value;
 pub use website::Website;
 
 #[pyfunction]
