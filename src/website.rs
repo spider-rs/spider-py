@@ -1,6 +1,7 @@
-use crate::{new_page, NPage, BUFFER};
+use crate::{new_page, pydict_to_json_value, NPage, BUFFER};
 use indexmap::IndexMap;
 use pyo3::prelude::*;
+use pyo3::types::PyDict;
 use spider::compact_str::CompactString;
 use spider::configuration::WaitForIdleNetwork;
 use spider::tokio::select;
@@ -741,24 +742,67 @@ impl Website {
     slf
   }
 
+  /// Take a screenshot of the page when using chrome.
+  pub fn with_screenshot<'a>(
+    mut slf: PyRefMut<'a, Self>,
+    screenshot_configs: Option<&'a PyDict>,
+  ) -> PyRefMut<'a, Self> {
+    if let Some(py_obj) = screenshot_configs {
+      if let Ok(config_json) = pydict_to_json_value(py_obj) {
+        match serde_json::from_value::<spider::configuration::ScreenShotConfig>(config_json) {
+          Ok(configs) => {
+            slf.inner.with_screenshot(Some(configs));
+          }
+          Err(e) => {
+            spider::utils::log("", e.to_string());
+          }
+        }
+      } else {
+        spider::utils::log("Error extracting String from PyAny", "");
+      }
+    }
+
+    slf
+  }
+
+  /// Use OpenAI to generate dynamic javascript snippets. Make sure to set the `OPENAI_API_KEY` env variable.
+  pub fn with_openai<'a>(
+    mut slf: PyRefMut<'a, Self>,
+    openai_configs: Option<&'a PyDict>,
+  ) -> PyRefMut<'a, Self> {
+    if let Some(py_obj) = openai_configs {
+      if let Ok(config_json) = pydict_to_json_value(py_obj) {
+        match serde_json::from_value::<spider::configuration::GPTConfigs>(config_json) {
+          Ok(configs) => {
+            slf.inner.with_openai(Some(configs));
+          }
+          Err(e) => {
+            spider::utils::log("", e.to_string());
+          }
+        }
+      } else {
+        spider::utils::log("Error extracting String from PyAny for OpenAI config", "");
+      }
+    }
+
+    slf
+  }
+
   /// Regex black list urls from the crawl
   pub fn with_blacklist_url(
     mut slf: PyRefMut<'_, Self>,
     blacklist_url: Option<Vec<String>>,
   ) -> PyRefMut<'_, Self> {
-    slf
-      .inner
-      .configuration
-      .with_blacklist_url(match blacklist_url {
-        Some(v) => {
-          let mut blacklist: Vec<CompactString> = Vec::new();
-          for item in v {
-            blacklist.push(CompactString::new(item));
-          }
-          Some(blacklist)
+    slf.inner.with_blacklist_url(match blacklist_url {
+      Some(v) => {
+        let mut blacklist: Vec<CompactString> = Vec::new();
+        for item in v {
+          blacklist.push(CompactString::new(item));
         }
-        _ => None,
-      });
+        Some(blacklist)
+      }
+      _ => None,
+    });
 
     slf
   }

@@ -206,7 +206,6 @@ async def main():
 asyncio.run(main())
 ```
 
-
 ### Wait For Idle Network
 
 You can wait for the Network to become idle when using chrome. This helps load all the data from client side scripts.
@@ -232,6 +231,53 @@ from spider_rs import Website
 
 async def main():
     website = Website("https://choosealicense.com").with_respect_robots_txt(True)
+
+asyncio.run(main())
+```
+
+### OpenAI
+
+Use OpenAI to generate dynamic scripts to use with headless. Make sure to set the `OPENAI_API_KEY` env variable.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = (
+        Website("https://google.com")
+        .with_openai({
+            "model": "gpt-3.5-turbo", 
+            "prompt": "Search for movies", 
+            "maxTokens": 300
+        })
+    )
+
+asyncio.run(main())
+```
+
+### Screenshots
+
+Take a screenshot of the pages on crawl when using headless chrome.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = (
+        Website("https://choosealicense.com", False)
+        .with_screenshot({
+            "params": {
+                "cdp_params": None,
+                "full_page": True,
+                "omit_background": False
+            },
+            "bytes": False,
+            "save": True,
+            "output_dir": None
+        })
+    )
 
 asyncio.run(main())
 ```
