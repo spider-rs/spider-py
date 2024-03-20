@@ -440,7 +440,14 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website("https://choosealicense.com").with_openai({ model: "gpt-3.5-turbo", prompt: "Search for movies", maxTokens: 300 })
+    website = (
+        Website("https://choosealicense.com")
+        .with_openai({
+            "model": "gpt-3.5-turbo", 
+            "prompt": "Search for movies", 
+            "maxTokens": 300
+        })
+    )
 
 asyncio.run(main())
 </code></pre>
