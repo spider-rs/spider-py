@@ -1,9 +1,10 @@
 [package]
 edition = "2021"
 name = "spider_rs"
-version = "0.0.31"
+version = "0.0.32"
 repository = "https://github.com/spider-rs/spider-py"
 license = "MIT"
+description = "The fastest web crawler and indexer."
 
 [lib]
 crate-type = ["cdylib"]
@@ -11,7 +12,7 @@ crate-type = ["cdylib"]
 [dependencies]
 indexmap = "2.1.0"
 num_cpus = "1.16.0"
-spider = { version = "1.86.13", features = ["budget", "cron", "regex", "cookies", "socks", "chrome", "control", "smart", "chrome_intercept", "cache", "serde", "openai" ] }
+spider = { version = "1.88.2", features = ["budget", "cron", "regex", "cookies", "socks", "chrome", "control", "smart", "chrome_intercept", "cache", "serde", "openai" ] }
 pyo3 = { version = "0.20.3", features = ["extension-module", "serde"] }
 pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
 serde_json = "1.0.114"
