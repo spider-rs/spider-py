@@ -12,7 +12,7 @@ crate-type = ["cdylib"]
 [dependencies]
 indexmap = "2.1.0"
 num_cpus = "1.16.0"
-spider = { version = "1.89.2", features = ["budget", "cron", "regex", "cookies", "socks", "chrome", "control", "smart", "chrome_intercept", "cache", "serde", "openai" ] }
+spider = { version = "1.89.5", features = ["budget", "cron", "regex", "cookies", "socks", "chrome", "control", "smart", "chrome_intercept", "cache", "serde", "openai" ] }
 pyo3 = { version = "0.20.3", features = ["extension-module", "serde"] }
 pyo3-asyncio = { version = "0.20", features = ["attributes", "tokio-runtime"] }
 serde_json = "1.0.114"
