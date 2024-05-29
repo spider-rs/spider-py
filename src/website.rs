@@ -103,7 +103,7 @@ impl Website {
 
     // prevent the last background run
     if slf.running_in_background {
-      let domain_name = slf.inner.get_domain().inner().clone();
+      let domain_name = slf.inner.get_url().inner().clone();
 
       let _ = pyo3_asyncio::tokio::future_into_py(slf.py(), async move {
         shutdown(&domain_name).await;
