@@ -62,20 +62,3 @@ async def main():
     website = Website("https://choosealicense.com")
     website.crawl(Subscription())
 ```
-
-## Shortcut
-
-You can use the `crawl` shortcut method to collect contents quickly without configuration.
-
-```ts
-import asyncio
-
-from spider_rs import crawl
-
-async def main():
-    website = crawl("https://jeffmendez.com")
-    print(website.links)
-    # print(website.pages)
-
-asyncio.run(main())
-```
