@@ -18,8 +18,7 @@ from spider_rs import Website
 async def main():
     website = Website("https://jeffmendez.com")
     website.crawl()
-    print(website.links)
-    # print(website.pages)
+    print(website.get_links())
 
 asyncio.run(main())
 ```
