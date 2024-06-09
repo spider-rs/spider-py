@@ -103,7 +103,7 @@ import asyncio
 from spider_rs import Website
 
 async def main():
-    website = Website("https://choosealicense.com").with_tlds(True)
+    website = Website("https://choosealicense.com").with_tld(True)
 
 asyncio.run(main())
 ```
@@ -247,8 +247,8 @@ async def main():
     website = (
         Website("https://google.com")
         .with_openai({
-            "model": "gpt-3.5-turbo", 
-            "prompt": "Search for movies", 
+            "model": "gpt-3.5-turbo",
+            "prompt": "Search for movies",
             "maxTokens": 300
         })
     )
