@@ -215,8 +215,7 @@ from spider_rs import Website
 async def main():
     website = Website("https://jeffmendez.com")
     website.crawl()
-    print(website.links)
-    # print(website.pages)
+    print(website.get_links())
 
 asyncio.run(main())
 </code></pre>
@@ -251,19 +250,6 @@ class Subscription:
 async def main():
     website = Website("https://choosealicense.com")
     website.crawl(Subscription())
-</code></pre>
-<h2 id="shortcut"><a class="header" href="#shortcut">Shortcut</a></h2>
-<p>You can use the <code>crawl</code> shortcut method to collect contents quickly without configuration.</p>
-<pre><code class="language-ts">import asyncio
-
-from spider_rs import crawl
-
-async def main():
-    website = crawl("https://jeffmendez.com")
-    print(website.links)
-    # print(website.pages)
-
-asyncio.run(main())
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="website"><a class="header" href="#website">Website</a></h1>
 <p>The Website class is the foundations to the spider.</p>
@@ -339,7 +325,7 @@ asyncio.run(main())
 from spider_rs import Website
 
 async def main():
-    website = Website("https://choosealicense.com").with_tlds(True)
+    website = Website("https://choosealicense.com").with_tld(True)
 
 asyncio.run(main())
 </code></pre>
@@ -443,8 +429,8 @@ async def main():
     website = (
         Website("https://google.com")
         .with_openai({
-            "model": "gpt-3.5-turbo", 
-            "prompt": "Search for movies", 
+            "model": "gpt-3.5-turbo",
+            "prompt": "Search for movies",
             "maxTokens": 300
         })
     )

@@ -192,8 +192,7 @@ from spider_rs import Website
 async def main():
     website = Website("https://jeffmendez.com")
     website.crawl()
-    print(website.links)
-    # print(website.pages)
+    print(website.get_links())
 
 asyncio.run(main())
 </code></pre>
@@ -228,19 +227,6 @@ class Subscription:
 async def main():
     website = Website("https://choosealicense.com")
     website.crawl(Subscription())
-</code></pre>
-<h2 id="shortcut"><a class="header" href="#shortcut">Shortcut</a></h2>
-<p>You can use the <code>crawl</code> shortcut method to collect contents quickly without configuration.</p>
-<pre><code class="language-ts">import asyncio
-
-from spider_rs import crawl
-
-async def main():
-    website = crawl("https://jeffmendez.com")
-    print(website.links)
-    # print(website.pages)
-
-asyncio.run(main())
 </code></pre>
 
                     </main>
