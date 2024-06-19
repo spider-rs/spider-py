@@ -286,6 +286,16 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
+<h3 id="whitelist"><a class="header" href="#whitelist">Whitelist</a></h3>
+<p>Only crawl set paths, url, or pattern with Regex.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_whitelist_url(["/licenses"])
+
+asyncio.run(main())
+</code></pre>
 <h3 id="crons"><a class="header" href="#crons">Crons</a></h3>
 <p>Setup a cron job that can run at any time in the background using cron-syntax.</p>
 <pre><code class="language-py">import asyncio
