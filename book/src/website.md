@@ -48,6 +48,20 @@ async def main():
 asyncio.run(main())
 ```
 
+### Whitelist
+
+Only crawl set paths, url, or pattern with Regex.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_whitelist_url(["/licenses"])
+
+asyncio.run(main())
+```
+
 ### Crons
 
 Setup a cron job that can run at any time in the background using cron-syntax.

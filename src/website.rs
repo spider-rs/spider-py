@@ -788,7 +788,7 @@ impl Website {
     slf
   }
 
-  /// Regex black list urls from the crawl
+  /// Regex blacklist urls from the crawl
   pub fn with_blacklist_url(
     mut slf: PyRefMut<'_, Self>,
     blacklist_url: Option<Vec<String>>,
@@ -800,6 +800,25 @@ impl Website {
           blacklist.push(CompactString::new(item));
         }
         Some(blacklist)
+      }
+      _ => None,
+    });
+
+    slf
+  }
+
+  /// Regex whitelist urls from the crawl
+  pub fn with_whitelist_url(
+    mut slf: PyRefMut<'_, Self>,
+    whitelist_url: Option<Vec<String>>,
+  ) -> PyRefMut<'_, Self> {
+    slf.inner.with_whitelist_url(match whitelist_url {
+      Some(v) => {
+        let mut whitelist: Vec<CompactString> = Vec::new();
+        for item in v {
+          whitelist.push(CompactString::new(item));
+        }
+        Some(whitelist)
       }
       _ => None,
     });
