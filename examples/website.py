@@ -1,12 +1,14 @@
 import asyncio
 import time
+from typing import List
 from spider_rs import Website
 
-async def main():
-    website = Website("https://choosealicense.com", False)
-    a = time.time()
+async def main() -> None:
+    website: Website = Website("https://choosealicense.com", False)
+    start_time: float = time.time()
     website.crawl()
-    print(website.get_links())
-    print("time " + str((time.time() - a)))
+    links: List[str] = website.get_links()
+    print(links)
+    print(f"time {time.time() - start_time}")
 
 asyncio.run(main())

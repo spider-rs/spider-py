@@ -1,9 +1,9 @@
 import asyncio
-
+from typing import Dict, Any
 from spider_rs import Website
 
-async def main():
-    website = (
+async def main() -> None:
+    website: Website = (
         Website("https://choosealicense.com", False)
         .with_screenshot({
             "params": {
@@ -24,6 +24,5 @@ async def main():
     )
     website.crawl(None, None, True)
     print(website.get_links())
-
 
 asyncio.run(main())

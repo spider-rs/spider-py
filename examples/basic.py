@@ -1,9 +1,9 @@
 import asyncio
+from typing import List
+from spider_rs import crawl, Website
 
-from spider_rs import crawl
-
-async def main():
-    website = await crawl("https://choosealicense.com")
+async def main() -> None:
+    website: Website = await crawl("https://choosealicense.com")
     print(website.links)
 
 asyncio.run(main())
