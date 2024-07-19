@@ -1,5 +1,6 @@
 use pyo3::{pyclass, pymethods, PyRef, PyRefMut};
-use spider::compact_str::CompactString;
+use spider::{compact_str::CompactString, reqwest::header::HeaderMap};
+use std::collections::HashMap;
 
 /// a simple page object
 #[derive(Default)]
@@ -17,17 +18,39 @@ pub struct Page {
   pub subdomains: Option<bool>,
   pub tld: Option<bool>,
   pub status_code: u16,
+  pub headers: Option<HashMap<String, String>>,
+}
+
+/// convert a headermap to hashmap
+pub fn header_map_to_hash_map(header_map: &HeaderMap) -> HashMap<String, String> {
+  let mut hash_map = HashMap::new();
+
+  for (key, value) in header_map.iter() {
+    let key = key.as_str().to_string();
+
+    if let Ok(value_str) = value.to_str() {
+      hash_map.insert(key, value_str.to_string());
+    }
+  }
+
+  hash_map
 }
 
 #[pymethods]
 impl Page {
   /// a new page
   #[new]
-  pub fn new(url: String, subdomains: Option<bool>, tld: Option<bool>) -> Self {
+  pub fn new(
+    url: String,
+    subdomains: Option<bool>,
+    tld: Option<bool>,
+    headers: Option<HashMap<String, String>>,
+  ) -> Self {
     Page {
       url,
       subdomains,
       tld,
+      headers,
       ..Default::default()
     }
   }

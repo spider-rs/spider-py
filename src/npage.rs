@@ -1,9 +1,13 @@
+use std::collections::HashMap;
+
 use pyo3::prelude::*;
 
 use spider::{
   lazy_static::lazy_static,
   packages::scraper::{Html, Selector},
 };
+
+use crate::page::header_map_to_hash_map;
 
 /// a simple page object
 #[derive(Default, Clone)]
@@ -21,6 +25,9 @@ pub struct NPage {
   #[pyo3(get)]
   /// the raw content
   pub raw_content: Option<Vec<u8>>,
+  #[pyo3(get)]
+  /// the headers
+  pub headers: Option<HashMap<String, String>>,
 }
 
 /// get the page title.
@@ -42,6 +49,10 @@ pub fn new_page(res: &spider::page::Page, raw: bool) -> NPage {
       Some(res.get_html_bytes_u8().into())
     } else {
       None
+    },
+    headers: match res.headers {
+      Some(ref headers) => Some(header_map_to_hash_map(headers)),
+      _ => None,
     },
   }
 }
