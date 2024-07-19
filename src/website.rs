@@ -658,6 +658,18 @@ impl Website {
     slf
   }
 
+  /// Determine whether to collect all the resources found on pages.
+  pub fn with_full_resources(
+    mut slf: PyRefMut<'_, Self>,
+    full_resources: bool,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_full_resources(full_resources);
+    slf
+  }
+  
   /// Include subdomains detection.
   pub fn with_subdomains(mut slf: PyRefMut<'_, Self>, subdomains: bool) -> PyRefMut<'_, Self> {
     slf.inner.configuration.with_subdomains(subdomains);

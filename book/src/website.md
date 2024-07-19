@@ -249,6 +249,20 @@ async def main():
 asyncio.run(main())
 ```
 
+### Collect Full Resources
+
+Collect all resources found not just valid web pages.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_full_resources(True)
+
+asyncio.run(main())
+```
+
 ### OpenAI
 
 Use OpenAI to generate dynamic scripts to use with headless. Make sure to set the `OPENAI_API_KEY` env variable.
