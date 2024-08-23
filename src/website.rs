@@ -3,7 +3,7 @@ use indexmap::IndexMap;
 use pyo3::prelude::*;
 use pyo3::types::PyDict;
 use spider::compact_str::CompactString;
-use spider::configuration::WaitForIdleNetwork;
+use spider::configuration::{WaitForDelay, WaitForIdleNetwork, WaitForSelector};
 use spider::tokio::select;
 use spider::tokio::task::JoinHandle;
 use spider::utils::shutdown;
@@ -715,6 +715,46 @@ impl Website {
   /// Cache the page following HTTP rules.
   pub fn with_caching(mut slf: PyRefMut<'_, Self>, cache: bool) -> PyRefMut<'_, Self> {
     slf.inner.with_caching(cache);
+    slf
+  }
+
+  /// Wait for a delay. Should only be used for testing. This method does nothing if the `chrome` feature is not enabled.
+  pub fn with_wait_for_delay(
+    mut slf: PyRefMut<'_, Self>,
+    timeout: Option<u64>,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_wait_for_delay(if timeout.is_some() {
+        let duration = Duration::from_millis(timeout.unwrap_or_default());
+        Some(WaitForDelay::new(Some(duration)))
+      } else {
+        None
+      });
+
+    slf
+  }
+
+  /// Wait for a CSS query selector. This method does nothing if the `chrome` feature is not enabled.
+  pub fn with_wait_for_selector(
+    mut slf: PyRefMut<'_, Self>,
+    selector: Option<String>,
+    timeout: Option<u64>,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .configuration
+      .with_wait_for_selector(if timeout.is_some() {
+        let duration = Duration::from_millis(timeout.unwrap_or_default());
+        Some(WaitForSelector::new(
+          Some(duration),
+          selector.unwrap_or_default().to_string(),
+        ))
+      } else {
+        None
+      });
+
     slf
   }
 
