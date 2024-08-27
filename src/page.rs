@@ -1,5 +1,5 @@
 use pyo3::{pyclass, pymethods, PyRef, PyRefMut};
-use spider::{compact_str::CompactString, reqwest::header::HeaderMap};
+use spider::{compact_str::CompactString, hashbrown::HashSet, reqwest::header::HeaderMap};
 use std::collections::HashMap;
 
 /// a simple page object
@@ -15,10 +15,16 @@ pub struct Page {
   )>,
   /// the url for the page
   pub url: String,
+  /// subdomains being crawled?
   pub subdomains: Option<bool>,
+  /// tld being crawled?
   pub tld: Option<bool>,
+  /// The HTTP status code.
   pub status_code: u16,
+  /// The HTTP headers.
   pub headers: Option<HashMap<String, String>>,
+  /// The links found on the page. Requires the website.builder method website.with_subscription_return_page_links to be set to true.
+  pub links: Option<HashSet<String>>,
 }
 
 /// convert a headermap to hashmap

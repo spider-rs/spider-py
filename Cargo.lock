@@ -2370,9 +2370,9 @@ dependencies = [
 
 [[package]]
 name = "rustix"
-version = "0.38.34"
+version = "0.38.35"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "70dc5ec042f7a43c4a73241207cecc9873a06d45debb38b329f8541d85c2730f"
+checksum = "a85d50532239da68e9addb745ba38ff4612a242c1c7ceea689c4bc7c2f43c36f"
 dependencies = [
  "bitflags 2.6.0",
  "errno",
@@ -2427,9 +2427,9 @@ checksum = "fc0a2ce646f8655401bb81e7927b812614bd5d91dbc968696be50603510fcaf0"
 
 [[package]]
 name = "rustls-webpki"
-version = "0.102.6"
+version = "0.102.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e6b52d4fda176fd835fdc55a835d4a89b8499cad995885a21149d5ad62f852e"
+checksum = "84678086bd54edf2b415183ed7a94d0efb049f1b646a33e22a36f3794be6ae56"
 dependencies = [
  "ring",
  "rustls-pki-types",
@@ -2694,9 +2694,9 @@ dependencies = [
 
 [[package]]
 name = "spider"
-version = "2.0.17"
+version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22cbe3e048eb876764dffa17de8532edbeb66ceec9110f6db7441d923c58086a"
+checksum = "6cc111d3f26cbceb70d37fabab58ed4730de66b0d2144dc67805dcdee318d6f0"
 dependencies = [
  "ahash",
  "async-openai",
@@ -2739,7 +2739,7 @@ dependencies = [
 
 [[package]]
 name = "spider_rs"
-version = "0.0.48"
+version = "0.0.49"
 dependencies = [
  "indexmap",
  "num_cpus",

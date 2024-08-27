@@ -718,6 +718,17 @@ impl Website {
     slf
   }
 
+  /// Return the links found on the page in the channel subscriptions. This method does nothing if the `decentralized` is enabled.
+  pub fn with_return_page_links(
+    mut slf: PyRefMut<'_, Self>,
+    return_page_links: bool,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .with_return_page_links(return_page_links);
+    slf
+  }
+
   /// Wait for a delay. Should only be used for testing. This method does nothing if the `chrome` feature is not enabled.
   pub fn with_wait_for_delay(
     mut slf: PyRefMut<'_, Self>,

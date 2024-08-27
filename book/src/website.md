@@ -20,6 +20,20 @@ async def main():
 asyncio.run(main())
 ```
 
+### Return Page Links
+
+Return links found on the page resource.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_return_page_links(True)
+
+asyncio.run(main())
+```
+
 ### Custom Headers
 
 Add custom HTTP headers to use when crawling/scraping.
