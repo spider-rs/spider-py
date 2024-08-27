@@ -194,6 +194,16 @@ async def main():
 
 asyncio.run(main())
 </code></pre>
+<h3 id="return-page-links"><a class="header" href="#return-page-links">Return Page Links</a></h3>
+<p>Return links found on the page resource.</p>
+<pre><code class="language-py">import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_return_page_links(True)
+
+asyncio.run(main())
+</code></pre>
 <h3 id="custom-headers"><a class="header" href="#custom-headers">Custom Headers</a></h3>
 <p>Add custom HTTP headers to use when crawling/scraping.</p>
 <pre><code class="language-py">import asyncio
