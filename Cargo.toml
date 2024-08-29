@@ -1,7 +1,7 @@
 [package]
 edition = "2021"
 name = "spider_rs"
-version = "0.0.49"
+version = "0.0.50"
 repository = "https://github.com/spider-rs/spider-py"
 license = "MIT"
 description = "The fastest web crawler and indexer."
