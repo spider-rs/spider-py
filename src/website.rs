@@ -578,10 +578,12 @@ impl Website {
   pub fn drain_links(&mut self) -> Vec<String> {
     let links = self
       .inner
-      .drain_links()
+      .get_links()
+      .iter()
       .map(|x| x.as_ref().to_string())
       .collect::<Vec<String>>();
-
+    // drain for now until clear method exposure.
+    self.inner.drain_links();
     links
   }
 
@@ -726,6 +728,28 @@ impl Website {
     slf
       .inner
       .with_return_page_links(return_page_links);
+    slf
+  }
+
+  /// Set the connection url for the chrome instance. This method does nothing if the `chrome` is not enabled.
+  pub fn with_chrome_connection(
+    mut slf: PyRefMut<'_, Self>,
+    chome_connection: String,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .with_chrome_connection(if chome_connection.is_empty() { None } else { Some (chome_connection)});
+    slf
+  }
+
+  /// Preserve the HOST header.
+  pub fn with_preserve_host_header(
+    mut slf: PyRefMut<'_, Self>,
+    preserve: bool,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .with_preserve_host_header(preserve);
     slf
   }
 

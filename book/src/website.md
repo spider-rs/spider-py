@@ -136,6 +136,20 @@ async def main():
 asyncio.run(main())
 ```
 
+### Chrome Remote Connection
+
+Add a chrome remote connection url. This can be a json endpoint or ws direct connection.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_chrome_connection("http://localhost:9222/json/version")
+
+asyncio.run(main())
+```
+
 ### External Domains
 
 Add external domains to include with the website.
@@ -334,6 +348,20 @@ from spider_rs import Website
 
 async def main():
     website = Website("https://choosealicense.com").with_http2_prior_knowledge(True)
+
+asyncio.run(main())
+```
+
+### Preserve Host
+
+Preserve the HOST HTTP header.
+
+```py
+import asyncio
+from spider_rs import Website
+
+async def main():
+    website = Website("https://choosealicense.com").with_preserve_host_header(True)
 
 asyncio.run(main())
 ```

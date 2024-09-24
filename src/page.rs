@@ -12,6 +12,7 @@ pub struct Page {
   selectors: Option<(
     CompactString,
     spider::smallvec::SmallVec<[CompactString; 2]>,
+    CompactString
   )>,
   /// the url for the page
   pub url: String,
