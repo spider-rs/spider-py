@@ -28,6 +28,7 @@ pub struct Website {
 impl Website {
   /// a new website.
   #[new]
+  #[pyo3(signature = (url, raw_content=None))]
   pub fn new(url: String, raw_content: Option<bool>) -> Self {
     Website {
       inner: spider::website::Website::new(&url),
@@ -51,7 +52,7 @@ impl Website {
       .expect("sync feature should be enabled");
     let raw_content = slf.raw_content;
 
-    let handle = pyo3_asyncio::tokio::get_runtime().spawn(async move {
+    let handle = pyo3_async_runtimes::tokio::get_runtime().spawn(async move {
       while let Ok(res) = rx2.recv().await {
         let page = new_page(&res, raw_content);
         Python::with_gil(|py| {
@@ -72,6 +73,7 @@ impl Website {
   }
 
   /// remove a subscription listener.
+  #[pyo3(signature = (id=None))]
   pub fn unsubscribe(&mut self, id: Option<u32>) -> bool {
     match id {
       Some(id) => {
@@ -97,7 +99,8 @@ impl Website {
     }
   }
 
-  /// stop a crawl
+  /// stop a crawl.
+  #[pyo3(signature = (id=None))]
   pub fn stop(mut slf: PyRefMut<'_, Self>, id: Option<u32>) -> bool {
     slf.inner.stop();
 
@@ -105,7 +108,7 @@ impl Website {
     if slf.running_in_background {
       let domain_name = slf.inner.get_url().inner().clone();
 
-      let _ = pyo3_asyncio::tokio::future_into_py(slf.py(), async move {
+      let _ = pyo3_async_runtimes::tokio::future_into_py(slf.py(), async move {
         shutdown(&domain_name).await;
         Ok(())
       });
@@ -136,7 +139,8 @@ impl Website {
     }
   }
 
-  /// crawl a website
+  /// crawl a website without storing the page resources bytes directly.
+  #[pyo3(signature = (on_page_event=None, background=None, headless=None))]
   pub fn crawl(
     mut slf: PyRefMut<'_, Self>,
     on_page_event: Option<PyObject>,
@@ -196,7 +200,7 @@ impl Website {
             .expect("sync feature should be enabled");
 
           let py: Python<'_> = slf.py();
-          let rt = pyo3_asyncio::tokio::get_runtime();
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
           let f1 = async {
             while let Ok(res) = rx2.recv().await {
@@ -244,7 +248,7 @@ impl Website {
 
           slf.crawl_handles.insert(crawl_id, crawl_handle);
         } else {
-          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let _ = pyo3_async_runtimes::tokio::get_runtime().block_on(async move {
             if headless {
               slf.inner.crawl().await;
             } else {
@@ -257,7 +261,8 @@ impl Website {
     };
   }
 
-  /// crawl a website smart mode
+  /// crawl a website smart mode.
+  #[pyo3(signature = (on_page_event=None, background=None))]
   pub fn crawl_smart(
     mut slf: PyRefMut<'_, Self>,
     on_page_event: Option<PyObject>,
@@ -311,7 +316,7 @@ impl Website {
             .expect("sync feature should be enabled");
 
           let py: Python<'_> = slf.py();
-          let rt = pyo3_asyncio::tokio::get_runtime();
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
           let f1 = async {
             while let Ok(res) = rx2.recv().await {
@@ -351,7 +356,7 @@ impl Website {
 
           slf.crawl_handles.insert(crawl_id, crawl_handle);
         } else {
-          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let _ = pyo3_async_runtimes::tokio::get_runtime().block_on(async move {
             slf.inner.crawl_smart().await;
             Ok::<(), ()>(())
           });
@@ -360,7 +365,8 @@ impl Website {
     };
   }
 
-  /// scrape a website
+  /// scrape a website holding onto the bytes stored until the end of the crawl.
+  #[pyo3(signature = (on_page_event=None, background=None, headless=None))]
   pub fn scrape(
     mut slf: PyRefMut<'_, Self>,
     on_page_event: Option<PyObject>,
@@ -421,7 +427,7 @@ impl Website {
             .expect("sync feature should be enabled");
 
           let py: Python<'_> = slf.py();
-          let rt = pyo3_asyncio::tokio::get_runtime();
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
           let f1 = async {
             while let Ok(res) = rx2.recv().await {
@@ -469,7 +475,7 @@ impl Website {
 
           slf.crawl_handles.insert(crawl_id, crawl_handle);
         } else {
-          let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+          let _ = pyo3_async_runtimes::tokio::get_runtime().block_on(async move {
             if headless {
               slf.inner.scrape().await;
             } else {
@@ -482,7 +488,8 @@ impl Website {
     }
   }
 
-  /// run a cron job
+  /// run a cron job.
+  #[pyo3(signature = (on_page_event=None))]
   pub fn run_cron(mut slf: PyRefMut<'_, Self>, on_page_event: Option<PyObject>) -> Cron {
     let cron_handle = match on_page_event {
       Some(callback) => {
@@ -505,7 +512,7 @@ impl Website {
       _ => None,
     };
 
-    let inner = pyo3_asyncio::tokio::get_runtime()
+    let inner = pyo3_async_runtimes::tokio::get_runtime()
       .block_on(async move {
         let runner: spider::async_job::Runner = slf.inner.run_cron().await;
         Ok::<spider::async_job::Runner, ()>(runner)
@@ -536,22 +543,16 @@ impl Website {
   pub fn get_configuration_headers(&self) -> Vec<(String, String)> {
     let mut map = Vec::new();
 
-    match self.inner.configuration.headers.as_ref() {
-      Some(h) => {
-        for v in h.iter() {
-          let mut value = String::new();
+    if let Some(h) = self.inner.configuration.headers.as_ref() {
+      for v in h.inner().iter() {
+        let mut value = String::new();
 
-          match v.1.to_str() {
-            Ok(vv) => {
-              value.push_str(vv);
-            }
-            _ => (),
-          };
-
-          map.push((v.0.to_string(), value))
+        if let Ok(vv) = v.1.to_str() {
+          value.push_str(vv);
         }
+
+        map.push((v.0.to_string(), value))
       }
-      _ => (),
     }
 
     map
@@ -562,13 +563,10 @@ impl Website {
     let mut pages: Vec<NPage> = Vec::new();
     let raw_content = self.raw_content;
 
-    match self.inner.get_pages() {
-      Some(p) => {
-        for page in p.iter() {
-          pages.push(new_page(page, raw_content));
-        }
+    if let Some(p) = self.inner.get_pages() {
+      for page in p.iter() {
+        pages.push(new_page(page, raw_content));
       }
-      _ => (),
     }
 
     pages
@@ -593,6 +591,7 @@ impl Website {
   }
 
   /// Set HTTP headers for request using [reqwest::header::HeaderMap](https://docs.rs/reqwest/latest/reqwest/header/struct.HeaderMap.html).
+  #[pyo3(signature = (headers=None))]
   pub fn with_headers(
     mut slf: PyRefMut<'_, Self>,
     headers: Option<PyObject>,
@@ -602,7 +601,7 @@ impl Website {
       Some(obj) => {
         let mut h = spider::reqwest::header::HeaderMap::new();
         let py = slf.py();
-        let dict = obj.downcast::<pyo3::types::PyDict>(py);
+        let dict = obj.downcast_bound::<pyo3::types::PyDict>(py);
 
         match dict {
           Ok(keys) => {
@@ -637,6 +636,7 @@ impl Website {
   }
 
   /// Add user agent to request.
+  #[pyo3(signature = (user_agent=None))]
   pub fn with_user_agent(
     mut slf: PyRefMut<'_, Self>,
     user_agent: Option<String>,
@@ -694,6 +694,7 @@ impl Website {
   }
 
   /// Max time to wait for request duration to milliseconds.
+  #[pyo3(signature = (request_timeout=None))]
   pub fn with_request_timeout(
     mut slf: PyRefMut<'_, Self>,
     request_timeout: Option<u32>,
@@ -725,9 +726,7 @@ impl Website {
     mut slf: PyRefMut<'_, Self>,
     return_page_links: bool,
   ) -> PyRefMut<'_, Self> {
-    slf
-      .inner
-      .with_return_page_links(return_page_links);
+    slf.inner.with_return_page_links(return_page_links);
     slf
   }
 
@@ -738,7 +737,11 @@ impl Website {
   ) -> PyRefMut<'_, Self> {
     slf
       .inner
-      .with_chrome_connection(if chome_connection.is_empty() { None } else { Some (chome_connection)});
+      .with_chrome_connection(if chome_connection.is_empty() {
+        None
+      } else {
+        Some(chome_connection)
+      });
     slf
   }
 
@@ -747,13 +750,12 @@ impl Website {
     mut slf: PyRefMut<'_, Self>,
     preserve: bool,
   ) -> PyRefMut<'_, Self> {
-    slf
-      .inner
-      .with_preserve_host_header(preserve);
+    slf.inner.with_preserve_host_header(preserve);
     slf
   }
 
   /// Wait for a delay. Should only be used for testing. This method does nothing if the `chrome` feature is not enabled.
+  #[pyo3(signature = (timeout=None))]
   pub fn with_wait_for_delay(
     mut slf: PyRefMut<'_, Self>,
     timeout: Option<u64>,
@@ -772,6 +774,7 @@ impl Website {
   }
 
   /// Wait for a CSS query selector. This method does nothing if the `chrome` feature is not enabled.
+  #[pyo3(signature = (selector=None, timeout=None))]
   pub fn with_wait_for_selector(
     mut slf: PyRefMut<'_, Self>,
     selector: Option<String>,
@@ -793,7 +796,8 @@ impl Website {
     slf
   }
 
-  /// add external domains
+  /// add external domains.
+  #[pyo3(signature = (external_domains=None))]
   pub fn with_external_domains(
     mut slf: PyRefMut<'_, Self>,
     external_domains: Option<Vec<String>>,
@@ -805,7 +809,8 @@ impl Website {
     slf
   }
 
-  /// Set the crawling budget
+  /// Set the crawling budget.
+  #[pyo3(signature = (budget=None))]
   pub fn with_budget(
     mut slf: PyRefMut<'_, Self>,
     budget: Option<std::collections::HashMap<String, u32>>,
@@ -827,9 +832,10 @@ impl Website {
   }
 
   /// Take a screenshot of the page when using chrome.
+  #[pyo3(signature = (screenshot_configs=None))]
   pub fn with_screenshot<'a>(
     mut slf: PyRefMut<'a, Self>,
-    screenshot_configs: Option<&'a PyDict>,
+    screenshot_configs: Option<&Bound<'a, PyDict>>,
   ) -> PyRefMut<'a, Self> {
     if let Some(py_obj) = screenshot_configs {
       if let Ok(config_json) = pydict_to_json_value(py_obj) {
@@ -850,9 +856,10 @@ impl Website {
   }
 
   /// Use OpenAI to generate dynamic javascript snippets. Make sure to set the `OPENAI_API_KEY` env variable.
+  #[pyo3(signature = (openai_configs=None))]
   pub fn with_openai<'a>(
     mut slf: PyRefMut<'a, Self>,
-    openai_configs: Option<&'a PyDict>,
+    openai_configs: Option<&Bound<'a, PyDict>>,
   ) -> PyRefMut<'a, Self> {
     if let Some(py_obj) = openai_configs {
       if let Ok(config_json) = pydict_to_json_value(py_obj) {
@@ -873,6 +880,7 @@ impl Website {
   }
 
   /// Regex blacklist urls from the crawl
+  #[pyo3(signature = (blacklist_url=None))]
   pub fn with_blacklist_url(
     mut slf: PyRefMut<'_, Self>,
     blacklist_url: Option<Vec<String>>,
@@ -892,6 +900,7 @@ impl Website {
   }
 
   /// Regex whitelist urls from the crawl
+  #[pyo3(signature = (whitelist_url=None))]
   pub fn with_whitelist_url(
     mut slf: PyRefMut<'_, Self>,
     whitelist_url: Option<Vec<String>>,
@@ -916,9 +925,12 @@ impl Website {
     chrome_intercept: bool,
     block_images: bool,
   ) -> PyRefMut<'_, Self> {
-    slf
-      .inner
-      .with_chrome_intercept(chrome_intercept, block_images);
+    let mut intercept_config =
+      spider::features::chrome_common::RequestInterceptConfiguration::new(chrome_intercept);
+
+    intercept_config.block_visuals = block_images;
+
+    slf.inner.with_chrome_intercept(intercept_config);
     slf
   }
 
@@ -944,6 +956,7 @@ impl Website {
   }
 
   /// Setup cron jobs to run
+  #[pyo3(signature = (cron_str, cron_type=None))]
   pub fn with_cron(
     mut slf: PyRefMut<'_, Self>,
     cron_str: String,
@@ -967,6 +980,7 @@ impl Website {
   }
 
   /// Use proxies for request.
+  #[pyo3(signature = (proxies=None))]
   pub fn with_proxies(
     mut slf: PyRefMut<'_, Self>,
     proxies: Option<Vec<String>>,
@@ -1008,7 +1022,7 @@ impl Cron {
       Some(h) => h.abort(),
       _ => (),
     };
-    let _ = pyo3_asyncio::tokio::get_runtime().block_on(async move {
+    let _ = pyo3_async_runtimes::tokio::get_runtime().block_on(async move {
       slf.inner.stop().await;
       Ok::<(), ()>(())
     });

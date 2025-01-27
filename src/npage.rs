@@ -1,10 +1,11 @@
 use crate::page::header_map_to_hash_map;
 use pyo3::prelude::*;
-use spider::{
-  lazy_static::lazy_static,
-  packages::scraper::{Html, Selector},
-};
+use spider::lazy_static::lazy_static;
 use std::collections::{HashMap, HashSet};
+
+lazy_static! {
+  static ref TITLE_SELECTOR: scraper::Selector = scraper::Selector::parse("title").unwrap();
+}
 
 /// a simple page object
 #[derive(Default, Clone)]
@@ -70,11 +71,9 @@ pub fn new_page(res: &spider::page::Page, raw: bool) -> NPage {
 impl NPage {
   fn __call__(&self) {}
 
-  /// the html page title.
+  /// the html page title. TODO: remove for built in spider title passing.
   pub fn title(&self) -> String {
-    lazy_static! {
-      static ref TITLE_SELECTOR: Selector = Selector::parse("title").unwrap();
-    }
+    use scraper::Html;
     let fragment: Html = Html::parse_document(&self.content);
     match fragment.select(&TITLE_SELECTOR).next() {
       Some(title) => title.inner_html(),

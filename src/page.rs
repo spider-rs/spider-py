@@ -12,7 +12,7 @@ pub struct Page {
   selectors: Option<(
     CompactString,
     spider::smallvec::SmallVec<[CompactString; 2]>,
-    CompactString
+    CompactString,
   )>,
   /// the url for the page
   pub url: String,
@@ -45,8 +45,9 @@ pub fn header_map_to_hash_map(header_map: &HeaderMap) -> HashMap<String, String>
 
 #[pymethods]
 impl Page {
-  /// a new page
+  /// A new page to collect.
   #[new]
+  #[pyo3(signature = (url, subdomains=None, tld=None, headers=None))]
   pub fn new(
     url: String,
     subdomains: Option<bool>,
@@ -77,16 +78,16 @@ impl Page {
         client
       };
     }
-    let s = pyo3_asyncio::tokio::get_runtime()
+    let s = pyo3_async_runtimes::tokio::get_runtime()
       .block_on(async move {
         let page = spider::page::Page::new_page(&slf.url, &PAGE_CLIENT).await;
         slf.status_code = page.status_code.into();
         slf.inner = Some(page);
-        slf.selectors = spider::page::get_page_selectors(
+        slf.selectors = Some(spider::page::get_page_selectors(
           &slf.url,
           slf.subdomains.unwrap_or_default(),
           slf.tld.unwrap_or_default(),
-        );
+        ));
         Ok::<PyRefMut<'_, Page>, ()>(slf)
       })
       .unwrap();
@@ -99,9 +100,9 @@ impl Page {
     match &slf.selectors {
       Some(selectors) => match &slf.inner {
         Some(inner) => {
-          let links = pyo3_asyncio::tokio::get_runtime()
+          let links = pyo3_async_runtimes::tokio::get_runtime()
             .block_on(async move {
-              let links = inner.links(&selectors).await;
+              let links = inner.to_owned().links(&selectors, &None).await;
               Ok::<spider::hashbrown::HashSet<spider::CaseInsensitiveString>, ()>(links)
             })
             .unwrap_or_default();

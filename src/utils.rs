@@ -1,9 +1,11 @@
+use pyo3::types::PyAnyMethods;
+use pyo3::types::PyDictMethods;
 use pyo3::types::{PyAny, PyDict, PyList};
-use pyo3::PyResult;
+use pyo3::{Bound, PyResult};
 use serde_json::Value as JsonValue;
 
 /// convert pyobject to json value
-pub fn pyobj_to_json_value(obj: &PyAny) -> PyResult<JsonValue> {
+pub fn pyobj_to_json_value(obj: &Bound<PyAny>) -> PyResult<JsonValue> {
   // Handle None
   if obj.is_none() {
     Ok(JsonValue::Null)
@@ -23,15 +25,17 @@ pub fn pyobj_to_json_value(obj: &PyAny) -> PyResult<JsonValue> {
     Ok(JsonValue::String(val.to_string()))
   } else if let Ok(list) = obj.downcast::<PyList>() {
     let mut vec = Vec::new();
-    for item in list.iter() {
-      vec.push(pyobj_to_json_value(item)?);
+
+    while let Ok(item) = list.try_iter() {
+      vec.push(pyobj_to_json_value(&item)?);
     }
+
     Ok(JsonValue::Array(vec))
   } else if let Ok(dict) = obj.downcast::<PyDict>() {
     let mut map = serde_json::Map::new();
     for (k, v) in dict.iter() {
       let key: &str = k.extract()?;
-      let value = pyobj_to_json_value(v)?;
+      let value = pyobj_to_json_value(&v)?;
       map.insert(key.to_string(), value);
     }
     Ok(JsonValue::Object(map))
@@ -43,12 +47,12 @@ pub fn pyobj_to_json_value(obj: &PyAny) -> PyResult<JsonValue> {
 }
 
 /// convert pydict to json value
-pub fn pydict_to_json_value(py_dict: &pyo3::types::PyDict) -> PyResult<JsonValue> {
+pub fn pydict_to_json_value(py_dict: &Bound<pyo3::types::PyDict>) -> PyResult<JsonValue> {
   let mut map = serde_json::Map::new();
 
   for (k, v) in py_dict.iter() {
     let key: &str = k.extract()?;
-    let value: JsonValue = pyobj_to_json_value(v)?;
+    let value: JsonValue = pyobj_to_json_value(&v)?;
     map.insert(key.to_string(), value);
   }
 
