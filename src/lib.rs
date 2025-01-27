@@ -21,8 +21,10 @@ pub use utils::pydict_to_json_value;
 pub use website::Website;
 
 #[pyfunction]
-fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<&PyAny> {
-  pyo3_asyncio::tokio::future_into_py(py, async move {
+#[pyo3(signature = (url, raw_content=None))]
+/// Crawl a website storing the links found.
+fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<Bound<PyAny>> {
+  pyo3_async_runtimes::tokio::future_into_py(py, async move {
     let w = shortcut::crawl(url, raw_content).await;
 
     Ok(w)
@@ -30,7 +32,7 @@ fn crawl(py: Python, url: String, raw_content: Option<bool>) -> PyResult<&PyAny>
 }
 
 #[pymodule]
-fn spider_rs(_py: Python<'_>, m: &PyModule) -> PyResult<()> {
+fn spider_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
   m.add_function(wrap_pyfunction!(crawl, m)?)?;
   m.add_class::<Website>()?;
   m.add_class::<Page>()?;
