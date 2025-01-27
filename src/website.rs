@@ -934,6 +934,17 @@ impl Website {
     slf
   }
 
+  /// Dangerously accept invalid certificates - this should be used as a last resort.
+  pub fn with_danger_accept_invalid_certs(
+    mut slf: PyRefMut<'_, Self>,
+    accept_invalid_certs: bool,
+  ) -> PyRefMut<'_, Self> {
+    slf
+      .inner
+      .with_danger_accept_invalid_certs(accept_invalid_certs);
+    slf
+  }
+
   /// Wait for idle network request. This method does nothing if the `chrome` feature is not enabled.
   /// Set the timeout to 0 to disable the timeout.
   pub fn with_wait_for_idle_network(
