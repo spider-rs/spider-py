@@ -163,8 +163,9 @@ impl Website {
           let mut rx2 = website
             .subscribe(*BUFFER / 2)
             .expect("sync feature should be enabled");
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
-          let handle = spider::tokio::spawn(async move {
+          let handle = rt.spawn(async move {
             while let Ok(res) = rx2.recv().await {
               let page = new_page(&res, raw_content);
               Python::with_gil(|py| {
@@ -178,7 +179,7 @@ impl Website {
             _ => 0,
           };
 
-          let crawl_handle = spider::tokio::spawn(async move {
+          let crawl_handle = rt.spawn(async move {
             if headless {
               website.crawl().await;
             } else {
@@ -237,8 +238,9 @@ impl Website {
             Some(handle) => handle.0 + 1,
             _ => 0,
           };
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
-          let crawl_handle = spider::tokio::spawn(async move {
+          let crawl_handle = rt.spawn(async move {
             if headless {
               website.crawl().await;
             } else {
@@ -283,8 +285,9 @@ impl Website {
           let mut rx2 = website
             .subscribe(*BUFFER / 2)
             .expect("sync feature should be enabled");
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
-          let handle = spider::tokio::spawn(async move {
+          let handle = rt.spawn(async move {
             while let Ok(res) = rx2.recv().await {
               let page = new_page(&res, raw_content);
               Python::with_gil(|py| {
@@ -298,7 +301,7 @@ impl Website {
             _ => 0,
           };
 
-          let crawl_handle = spider::tokio::spawn(async move {
+          let crawl_handle = rt.spawn(async move {
             website.crawl_smart().await;
           });
 
@@ -344,13 +347,14 @@ impl Website {
       _ => {
         if background {
           let mut website = slf.inner.clone();
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
           let crawl_id = match slf.crawl_handles.last() {
             Some(handle) => handle.0 + 1,
             _ => 0,
           };
 
-          let crawl_handle = spider::tokio::spawn(async move {
+          let crawl_handle = rt.spawn(async move {
             website.crawl_smart().await;
           });
 
@@ -388,8 +392,9 @@ impl Website {
           let mut rx2 = website
             .subscribe(*BUFFER / 2)
             .expect("sync feature should be enabled");
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
-          let handle = spider::tokio::spawn(async move {
+          let handle = rt.spawn(async move {
             while let Ok(res) = rx2.recv().await {
               let page = new_page(&res, raw_content);
 
@@ -405,7 +410,7 @@ impl Website {
             _ => 0,
           };
 
-          let crawl_handle = spider::tokio::spawn(async move {
+          let crawl_handle = rt.spawn(async move {
             if headless {
               website.scrape().await;
             } else {
@@ -459,13 +464,14 @@ impl Website {
       _ => {
         if background {
           let mut website = slf.inner.clone();
+          let rt = pyo3_async_runtimes::tokio::get_runtime();
 
           let crawl_id = match slf.crawl_handles.last() {
             Some(handle) => handle.0 + 1,
             _ => 0,
           };
 
-          let crawl_handle = spider::tokio::spawn(async move {
+          let crawl_handle = rt.spawn(async move {
             if headless {
               website.scrape().await;
             } else {
@@ -498,8 +504,9 @@ impl Website {
           .subscribe(*BUFFER / 2)
           .expect("sync feature should be enabled");
         let raw_content = slf.raw_content;
+        let rt = pyo3_async_runtimes::tokio::get_runtime();
 
-        let handler = spider::tokio::spawn(async move {
+        let handler = rt.spawn(async move {
           while let Ok(res) = rx2.recv().await {
             Python::with_gil(|py| {
               let _ = callback.call(py, (new_page(&res, raw_content),), None);
@@ -603,28 +610,19 @@ impl Website {
         let py = slf.py();
         let dict = obj.downcast_bound::<pyo3::types::PyDict>(py);
 
-        match dict {
-          Ok(keys) => {
-            for key in keys.into_iter() {
-              let header_key = spider::reqwest::header::HeaderName::from_str(&key.0.to_string());
+        if let Ok(keys) = dict {
+          for key in keys.into_iter() {
+            let header_key = spider::reqwest::header::HeaderName::from_str(&key.0.to_string());
 
-              match header_key {
-                Ok(hn) => {
-                  let header_value = key.1.to_string();
+            if let Ok(hn) = header_key {
+              let header_value = key.1.to_string();
 
-                  match spider::reqwest::header::HeaderValue::from_str(&header_value) {
-                    Ok(hk) => {
-                      h.append(hn, hk);
-                    }
-                    _ => (),
-                  }
-                }
-                _ => (),
+              if let Ok(hk) = spider::reqwest::header::HeaderValue::from_str(&header_value) {
+                h.append(hn, hk);
               }
             }
-            slf.inner.with_headers(Some(h));
           }
-          _ => (),
+          slf.inner.with_headers(Some(h));
         }
       }
       _ => {
