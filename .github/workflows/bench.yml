@@ -2,11 +2,9 @@ name: Bench Compare
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
   checkout_and_test:
@@ -23,10 +21,29 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'
+          cache: pip
+
+      - name: Install system deps for lxml (Scrapy)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            build-essential \
+            libxml2-dev \
+            libxslt1-dev \
+            zlib1g-dev
+
+          # Python headers: CPython vs PyPy
+          if [[ "${{ matrix.python-version }}" == pypy* ]]; then
+            sudo apt-get install -y --no-install-recommends pypy3-dev
+          else
+            sudo apt-get install -y --no-install-recommends python3-dev
+          fi
 
       - name: Install Deps
-        run: pip install scrapy && pip install spider_rs
+        run: |
+          python -m pip install -U pip setuptools wheel
+          pip install scrapy
+          pip install spider_rs
 
       - name: Run Bench @spider-rs/spider-rs
         run: python ./bench/spider.py
