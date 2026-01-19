@@ -29,11 +29,12 @@ jobs:
           path: dist/*
 
   wheels:
-    name: Build wheels (${{ matrix.os }} • ${{ matrix.target }})
+    name: Build wheels (${{ matrix.os }} • ${{ matrix.target }} • py${{ matrix.python-version }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
         include:
           # Linux manylinux (glibc)
           - os: ubuntu-latest
@@ -61,22 +62,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # (Optional but recommended) speed up subsequent builds
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
       - name: Rust cache
         uses: Swatinem/rust-cache@v2
 
       - name: Build wheels
         uses: PyO3/maturin-action@v1
+        env:
+          # Ensure macOS wheels are broadly compatible
+          MACOSX_DEPLOYMENT_TARGET: "11.0"
         with:
           command: build
           target: ${{ matrix.target }}
           manylinux: ${{ matrix.manylinux }}
-          args: --release --out dist --strip
+          # Force maturin to use ONLY the Python we installed (prevents picking system Python 3.14)
+          args: >-
+            --release
+            --out dist
+            --strip
+            --interpreter python
 
       - name: Upload wheel artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: dist-${{ matrix.os }}-${{ matrix.target }}
+          name: dist-${{ matrix.os }}-${{ matrix.target }}-py${{ matrix.python-version }}
           path: dist/*
 
   publish:
@@ -98,10 +112,10 @@ jobs:
           find dist-artifacts -type f \( -name "*.whl" -o -name "*.tar.gz" \) -print -exec cp {} dist/ \;
           ls -la dist
 
-      - name: Publish (maturin)
-        uses: PyO3/maturin-action@v1
-        env:
-          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      # NOTE: Use PyPI publish action here (no Cargo.toml needed, no docker build step)
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
         with:
-          command: publish
-          args: --non-interactive --skip-existing --repository pypi --username __token__ --password ${{ secrets.PYPI_API_TOKEN }} dist/*
+          packages-dir: dist
+          password: ${{ secrets.PYPI_API_TOKEN }}
+          skip-existing: true
