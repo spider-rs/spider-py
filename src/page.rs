@@ -67,7 +67,7 @@ impl Page {
   pub fn fetch(mut slf: PyRefMut<'_, Self>) -> PyRefMut<'_, Self> {
     use spider::{
       lazy_static::lazy_static, reqwest::Client, reqwest_middleware::ClientWithMiddleware,
-      ClientBuilder,
+      reqwest_middleware::ClientBuilder,
     };
     lazy_static! {
       /// top level single page client to re-use.
