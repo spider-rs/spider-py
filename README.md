@@ -22,6 +22,8 @@ asyncio.run(main())
 
 View the [examples](./examples/) to learn more.
 
+If you would rather not run the crawler yourself, Spider also has a [hosted web scraping API](https://spider.cloud/web-scraper/?utm_source=github&utm_medium=readme&utm_campaign=spider-py) you can try from the browser.
+
 ## Development
 
 Install maturin `pipx install maturin` and python.

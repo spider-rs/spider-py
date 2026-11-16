@@ -14,3 +14,8 @@ classifiers = [
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
 ]
+
+[project.urls]
+Repository = "https://github.com/spider-rs/spider-py"
+Documentation = "https://spider-rs.github.io/spider-py/"
+"Hosted API" = "https://spider.cloud/web-scraper/?utm_source=pypi&utm_medium=directory&utm_campaign=spider-py"
